@@ -1,15 +1,34 @@
 package com.nicolearaya.smartbudget.ui.home  // Ajusta el paquete según tu estructura
 
+import GastosAdapter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.nicolearaya.smartbudget.databinding.FragmentHomeBinding
+import com.nicolearaya.smartbudget.R
+import com.nicolearaya.smartbudget.viewmodel.GastosViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: GastosViewModel by viewModels()
+
+    private val adapter = GastosAdapter { gasto ->
+        Toast.makeText(requireContext(), "Clic en: ${gasto.nombreGasto}", Toast.LENGTH_SHORT).show()
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -23,33 +42,26 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Configuración inicial del Fragment
-        setupUI()
+        // 2️⃣ Configura el RecyclerView PRIMERO
+        binding.recyclerGastos.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = this@HomeFragment.adapter
+            setHasFixedSize(true) // Optimización
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.allItems.collect { gastos ->
+                adapter.submitList(gastos)
+            }
+        }
+
     }
 
-    private fun setupUI() {
-
-
-        // Aquí puedes cargar datos (ej: lista de gastos desde ViewModel)
-    }
-
-    private fun getUserName(): String {
-        // Lógica para obtener el nombre del usuario (ej: SharedPreferences)
-        return "Usuario"
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null  // Limpiar binding para evitar leaks de memoria
     }
 
-    override fun onPause() {
-        super.onPause()
-        view?.visibility = View.GONE
-    }
 
-    override fun onResume() {
-        super.onResume()
-        view?.visibility = View.VISIBLE
-    }
 }

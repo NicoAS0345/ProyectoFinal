@@ -21,7 +21,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
 
-    <androidx.cardview.widget.CardView
+    <!--<androidx.cardview.widget.CardView
 
         android:id="@+id/card_default"
         android:layout_width="0dp"
@@ -36,7 +36,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.127">
 
-        <!-- Contenido de tu tarjeta -->
+         Contenido de tu tarjeta
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
@@ -63,9 +63,17 @@
                 android:text="Esta es una tarjeta predeterminada de ejemplo"
                 android:textAlignment="center" />
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </androidx.cardview.widget.CardView>-->
 
-
-    <!-- Puedes agregar más views aquí (RecyclerView para gastos, gráficos, etc.) -->
-
+    <!-- RecyclerView para mostrar las tarjetas de gastos -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerGastos"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_welcome"
+        tools:listitem="@layout/item_gasto_card" />
 </androidx.constraintlayout.widget.ConstraintLayout>

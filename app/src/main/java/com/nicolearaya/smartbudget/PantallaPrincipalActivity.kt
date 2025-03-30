@@ -9,8 +9,9 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.navigation.NavOptions
 import androidx.navigation.ui.NavigationUI // Asegúrate de tener este import
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class PantallaPrincipalActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPantallaPrincipalBinding

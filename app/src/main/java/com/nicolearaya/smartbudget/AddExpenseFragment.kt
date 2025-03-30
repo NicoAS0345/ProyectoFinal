@@ -4,12 +4,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.nicolearaya.smartbudget.databinding.FragmentAddExpenseBinding
+import com.nicolearaya.smartbudget.model.Gastos
+import com.nicolearaya.smartbudget.viewmodel.GastosViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AddExpenseFragment : Fragment() {
     private var _binding: FragmentAddExpenseBinding? = null
     private val binding get() = _binding!!
+    private val viewModel: GastosViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -27,24 +35,30 @@ class AddExpenseFragment : Fragment() {
 
     private fun setupUI() {
         binding.btnSaveExpense.setOnClickListener {
-            saveExpense()
+            guardarGasto()
         }
     }
 
-    private fun saveExpense() {
-        val name = binding.etExpenseName.text.toString()
-        val amount = binding.etExpenseAmount.text.toString()
+    private fun guardarGasto() {
+        val nombre = binding.nombreGasto.text.toString()
+        val monto = binding.montoGasto.text.toString().toDoubleOrNull() ?: 0.0
+        val descripcion = binding.descripcionGasto.text.toString()
+        val categoria = binding.categoriaGasto.text.toString()
+        val fecha = binding.fechaGasto.text.toString()
 
-        if (name.isNotEmpty() && amount.isNotEmpty()) {
-            // Aquí iría la lógica para guardar el gasto (ViewModel, base de datos, etc.)
-            // Por ahora solo mostramos un mensaje en consola
-            println("Gasto guardado: $name - $amount")
+        if (nombre.isNotEmpty() && monto > 0) {
+            val nuevoGasto = Gastos(
+                nombreGasto = nombre,
+                descripcion = descripcion,
+                categoria = categoria, // Puedes agregar un spinner para categorías
+                monto = monto,
+                fecha = fecha
+            )
 
-            // Opcional: regresar al fragment anterior después de guardar
-            parentFragmentManager.popBackStack()
+            viewModel.insert(nuevoGasto)
+            findNavController().popBackStack() // Regresa al fragment anterior
         } else {
-            // Mostrar error si los campos están vacíos
-            println("Por favor completa todos los campos")
+            Toast.makeText(requireContext(), "Completa todos los campos", Toast.LENGTH_SHORT).show()
         }
     }
 
