@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.nicolearaya.smartbudget.ui.home.HomeFragment"
+        android:label="Inicio"
+        tools:layout="@layout/fragment_home" >
+
+    <action
+        android:id="@+id/action_to_add_expense"
+        app:destination="@id/addExpenseFragment"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/nav_home"
+        app:popUpToInclusive="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addExpenseFragment"
+        android:name="com.nicolearaya.smartbudget.ui.expenses.AddExpenseFragment"
+        android:label="Añadir Gasto"
+        tools:layout="@layout/fragment_add_expense" />
+    <!--<fragment
+        android:id="@+id/FirstFragment"
+        android:name="com.nicolearaya.smartbudget.FirstFragment"
+        android:label="@string/first_fragment_label"
+        tools:layout="@layout/fragment_first">
+
+        <action
+            android:id="@+id/action_FirstFragment_to_SecondFragment"
+            app:destination="@id/SecondFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/SecondFragment"
+        android:name="com.nicolearaya.smartbudget.SecondFragment"
+        android:label="@string/second_fragment_label"
+        tools:layout="@layout/fragment_second">
+
+        <action
+            android:id="@+id/action_SecondFragment_to_FirstFragment"
+            app:destination="@id/FirstFragment" />
+    </fragment>-->
+</navigation>
