@@ -4,9 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context=".ui.expenses.AddExpenseFragment">
+    android:layout_height="match_parent">
+
+    <!-- Usa el mismo layout que fragment_add_expense.xml -->
 
 
     <TextView
@@ -83,7 +83,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
     <Button
-        android:id="@+id/btn_save_expense"
+        android:id="@+id/btn_save_edit_expense"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Guardar"
@@ -93,5 +93,8 @@
         app:layout_constraintTop_toBottomOf="@id/fecha_gasto"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+
+    <!-- Cambia el ID del botón a btnSaveExpense -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

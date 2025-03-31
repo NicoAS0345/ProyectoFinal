@@ -38,7 +38,7 @@ class GastosViewModel @Inject constructor(
     fun update(gastos: Gastos) = viewModelScope.launch {
         repository.update(gastos)
     }
-    fun deleteItem(gastos: Gastos) {
+    fun delete(gastos: Gastos) {
         viewModelScope.launch {
             repository.delete(gastos)
         }

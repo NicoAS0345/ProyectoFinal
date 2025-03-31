@@ -3,8 +3,13 @@ package com.nicolearaya.smartbudget.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.io.Serializable
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+
 
 //Aqui se crea la entidad y se le asigna un nombre de tabla
+@Parcelize
 @Entity(tableName = "gastos")
 
 data class Gastos (
@@ -17,4 +22,4 @@ data class Gastos (
     val fecha: String = "" /*SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())*/,
     val isSelected: Boolean=false
 
-    ):Serializable
+    ):Serializable, Parcelable

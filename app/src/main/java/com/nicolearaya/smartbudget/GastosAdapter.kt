@@ -11,7 +11,9 @@ import com.nicolearaya.smartbudget.R
 import com.nicolearaya.smartbudget.databinding.ItemGastoCardBinding
 
 
-class GastosAdapter(private val onItemClick: (Gastos) -> Unit) :
+class GastosAdapter(private val onEditClick: (Gastos) -> Unit,
+                    private val onDeleteClick: (Gastos) -> Unit,
+                    private val onItemClick: (Gastos) -> Unit) :
     ListAdapter<Gastos, GastosAdapter.GastosViewHolder>(DiffCallback()) {
 
 
@@ -21,6 +23,9 @@ class GastosAdapter(private val onItemClick: (Gastos) -> Unit) :
                     cardTitle.text = gasto.nombreGasto
                     cardDescription.text = "$${gasto.monto} - ${gasto.fecha}"
                     root.setOnClickListener { onItemClick(gasto) }
+
+                    btnEdit.setOnClickListener { onEditClick(gasto) }
+                    btnDelete.setOnClickListener { onDeleteClick(gasto) }
                 }
             }
     }
