@@ -1,6 +1,7 @@
 package com.nicolearaya.smartbudget
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.nicolearaya.smartbudget.databinding.ActivityPantallaPrincipalBinding
 import androidx.navigation.findNavController
@@ -46,6 +47,10 @@ class PantallaPrincipalActivity : AppCompatActivity() {
                 navController.navigate(R.id.action_to_add_expense)
             }
         }
+    }
+
+    fun showHideFab(show: Boolean) {
+        binding.anadirGasto.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     override fun onSupportNavigateUp(): Boolean {

@@ -8,8 +8,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.nicolearaya.smartbudget.PantallaPrincipalActivity
 import com.nicolearaya.smartbudget.databinding.FragmentAddExpenseBinding
 import com.nicolearaya.smartbudget.model.Gastos
+import com.nicolearaya.smartbudget.ui.home.HomeFragment
 import com.nicolearaya.smartbudget.viewmodel.GastosViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -60,6 +62,15 @@ class AddExpenseFragment : Fragment() {
         } else {
             Toast.makeText(requireContext(), "Completa todos los campos", Toast.LENGTH_SHORT).show()
         }
+    }
+    override fun onResume() {
+        super.onResume()
+        (activity as? PantallaPrincipalActivity)?.showHideFab(false)
+    }
+
+    override fun onPause() {
+        (activity as? PantallaPrincipalActivity)?.showHideFab(true)
+        super.onPause()
     }
 
     override fun onDestroyView() {

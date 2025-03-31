@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.nicolearaya.smartbudget.PantallaPrincipalActivity
 import com.nicolearaya.smartbudget.databinding.FragmentEditExpenseBinding
 import com.nicolearaya.smartbudget.model.Gastos
 import com.nicolearaya.smartbudget.viewmodel.GastosViewModel
@@ -74,6 +75,15 @@ class EditExpenseFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        (activity as? PantallaPrincipalActivity)?.showHideFab(false)
+    }
+
+    override fun onPause() {
+        (activity as? PantallaPrincipalActivity)?.showHideFab(true)
+        super.onPause()
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

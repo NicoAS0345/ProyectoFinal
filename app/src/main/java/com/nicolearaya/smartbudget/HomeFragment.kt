@@ -21,6 +21,7 @@ import com.nicolearaya.smartbudget.viewmodel.GastosViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import android.app.AlertDialog
+import com.nicolearaya.smartbudget.PantallaPrincipalActivity
 
 
 @AndroidEntryPoint
@@ -79,6 +80,16 @@ class HomeFragment : Fragment() {
             }
         }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as? PantallaPrincipalActivity)?.showHideFab(true)
+    }
+
+    override fun onPause() {
+        (activity as? PantallaPrincipalActivity)?.showHideFab(false)
+        super.onPause()
     }
 
 
