@@ -31,6 +31,7 @@ class HomeFragment : Fragment() {
     private val viewModel: GastosViewModel by viewModels()
 
     private val adapter = GastosAdapter(
+        // Navega al EditExpenseFragment con el gasto seleccionado
         onEditClick = { gasto ->
             val bundle = Bundle().apply {
                 putSerializable("gasto", gasto)
@@ -38,7 +39,9 @@ class HomeFragment : Fragment() {
             findNavController().navigate(
                 HomeFragmentDirections.actionHomeFragmentToEditExpenseFragment(gasto))
         },
+        //Indica que pasa cuando se le dal icono del basurero
         onDeleteClick = { gasto ->
+            // Muestra diálogo de confirmación para eliminar
             AlertDialog.Builder(requireContext())
                 .setTitle("Eliminar gasto")
                 .setMessage("¿Estás seguro de eliminar ${gasto.nombreGasto}?")
@@ -67,11 +70,11 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 2️⃣ Configura el RecyclerView PRIMERO
+        // Configura RecyclerView y observa cambios en la lista de gastos
         binding.recyclerGastos.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = this@HomeFragment.adapter
-            setHasFixedSize(true) // Optimización
+            setHasFixedSize(true)
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -82,6 +85,7 @@ class HomeFragment : Fragment() {
 
     }
 
+    //Maneja la visibilidad del boton de agregar
     override fun onResume() {
         super.onResume()
         (activity as? PantallaPrincipalActivity)?.showHideFab(true)

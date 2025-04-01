@@ -14,6 +14,7 @@ import com.nicolearaya.smartbudget.databinding.ItemGastoCardBinding
 class GastosAdapter(private val onEditClick: (Gastos) -> Unit,
                     private val onDeleteClick: (Gastos) -> Unit,
                     private val onItemClick: (Gastos) -> Unit) :
+    //Verifica los datos de la lista para indicarlos en las cards
     ListAdapter<Gastos, GastosAdapter.GastosViewHolder>(DiffCallback()) {
 
 
@@ -22,8 +23,9 @@ class GastosAdapter(private val onEditClick: (Gastos) -> Unit,
                 binding.apply {
                     cardTitle.text = gasto.nombreGasto
                     cardDescription.text = "$${gasto.monto} - ${gasto.fecha}"
-                    root.setOnClickListener { onItemClick(gasto) }
 
+                    // Listeners para botones de editar/eliminar y clic en la tarjeta
+                    root.setOnClickListener { onItemClick(gasto) }
                     btnEdit.setOnClickListener { onEditClick(gasto) }
                     btnDelete.setOnClickListener { onDeleteClick(gasto) }
                 }
@@ -43,6 +45,7 @@ class GastosAdapter(private val onEditClick: (Gastos) -> Unit,
         holder.bind(getItem(position))
     }
 
+    // DiffUtil para comparar listas de manera eficiente
     class DiffCallback : DiffUtil.ItemCallback<Gastos>() {
         override fun areItemsTheSame(oldItem: Gastos, newItem: Gastos) =
             oldItem.id == newItem.id

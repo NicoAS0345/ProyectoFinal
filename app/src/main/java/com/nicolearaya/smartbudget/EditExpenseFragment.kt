@@ -33,15 +33,18 @@ class EditExpenseFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Obtiene el gasto desde los argumentos
+
         currentGasto = arguments?.getParcelable<Gastos>("gasto") ?: run {
             Toast.makeText(requireContext(), "Error: No se encontró el gasto", Toast.LENGTH_SHORT).show()
-            findNavController().popBackStack()
+            findNavController().popBackStack()// Navega de regreso si no hay datos
             return
         }
 
         setupUI()
     }
 
+    // Rellena los campos con los datos del gasto
     private fun setupUI() {
         with(binding) {
             // Corrección 2: Asegurar que los IDs coincidan con el XML
@@ -51,7 +54,6 @@ class EditExpenseFragment : Fragment() {
             categoriaGasto.setText(currentGasto.categoria)
             fechaGasto.setText(currentGasto.fecha)
 
-            // Corrección 3: Verificar que el ID del botón sea correcto
             btnSaveEditExpense.setOnClickListener {
                 // Validación básica
                 if (nombreGasto.text.isNullOrEmpty() || montoGasto.text.isNullOrEmpty()) {
@@ -59,6 +61,7 @@ class EditExpenseFragment : Fragment() {
                     return@setOnClickListener
                 }
 
+                // Crea una copia actualizada del gasto
                 val updatedGasto = currentGasto.copy(
                     nombreGasto = nombreGasto.text.toString(),
                     monto = montoGasto.text.toString().toDoubleOrNull() ?: 0.0,
@@ -67,10 +70,9 @@ class EditExpenseFragment : Fragment() {
                     fecha = fechaGasto.text.toString()
                 )
 
-                // Corrección 4: Ejecutar la actualización
-                viewModel.update(updatedGasto)
+                viewModel.update(updatedGasto) // Actualiza en la base de datos
                 Toast.makeText(requireContext(), "Gasto actualizado", Toast.LENGTH_SHORT).show()
-                findNavController().popBackStack()
+                findNavController().popBackStack() // Regresa al fragmento anterior
             }
         }
     }

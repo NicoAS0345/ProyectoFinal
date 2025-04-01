@@ -9,14 +9,19 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.navigation.NavOptions
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI // Asegúrate de tener este import
 import dagger.hilt.android.AndroidEntryPoint
+import androidx.navigation.NavController
+import androidx.navigation.Navigation
+
 
 @AndroidEntryPoint
 class PantallaPrincipalActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPantallaPrincipalBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -47,15 +52,47 @@ class PantallaPrincipalActivity : AppCompatActivity() {
                 navController.navigate(R.id.action_to_add_expense)
             }
         }
+
+        setupNavigation()
+        setupBottomNav()
     }
 
+    // Método para que los fragmentos controlen la visibilidad del FAB
     fun showHideFab(show: Boolean) {
         binding.anadirGasto.visibility = if (show) View.VISIBLE else View.GONE
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp() || super.onSupportNavigateUp()
+    private fun setupNavigation() {
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment
+        navController = navHostFragment.navController
+    }
 
+    private fun setupBottomNav() {
+        // Deshabilitamos la navegación automática
+        binding.barraNavegacion.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    // Volver al home fragment sin crear nueva instancia
+                    navController.popBackStack(R.id.nav_home, false)
+                    true
+                }
+                else -> false
+            }
+        }
+
+        // Configurar el botón flotante
+        binding.anadirGasto.setOnClickListener {
+            navController.navigate(R.id.addExpenseFragment)
+        }
+
+        // Ocultar FAB en pantallas que no son el home
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            binding.anadirGasto.visibility =
+                if (destination.id == R.id.nav_home) View.VISIBLE else View.GONE
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp() || super.onSupportNavigateUp()
     }
 }
