@@ -52,33 +52,25 @@ class LoginViewModel @Inject constructor(private val auth:FirebaseAuth): ViewMod
 
     }
 
-    private fun isValidEmail(email: String): Boolean {
-        val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
-        return email.matches(emailPattern.toRegex())
-    }
 
     fun register(email: String, password: String) {
         _uiState.value = AuthUiState.Loading
+
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // Actualizar el perfil con el nombre
-                    val user = auth.currentUser
-                    val profileUpdates = UserProfileChangeRequest.Builder()
-                        .build()
-
-                    user?.updateProfile(profileUpdates)
-                        ?.addOnCompleteListener { updateTask ->
-                            if (updateTask.isSuccessful) {
-                                _uiState.value = AuthUiState.Success(user)
-                            } else {
-                                _uiState.value = AuthUiState.Error(updateTask.exception?.message ?: "Error al actualizar perfil")
-                            }
-                        }
+                    _uiState.value = AuthUiState.Success(auth.currentUser)
                 } else {
-                    _uiState.value = AuthUiState.Error(task.exception?.message ?: "Error desconocido")
+                    _uiState.value = AuthUiState.Error(
+                        task.exception?.message ?: "Error en el registro"
+                    )
                 }
             }
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+        return email.matches(emailPattern.toRegex())
     }
 
     fun logout() {
