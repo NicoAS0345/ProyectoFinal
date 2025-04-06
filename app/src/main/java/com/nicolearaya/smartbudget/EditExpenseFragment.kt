@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.nicolearaya.smartbudget.PantallaPrincipalActivity
 import com.nicolearaya.smartbudget.databinding.FragmentEditExpenseBinding
 import com.nicolearaya.smartbudget.model.Gastos
+import com.nicolearaya.smartbudget.model.GastosFirebase
 import com.nicolearaya.smartbudget.viewmodel.GastosViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -19,7 +20,7 @@ class EditExpenseFragment : Fragment() {
     private var _binding: FragmentEditExpenseBinding? = null
     private val binding get() = _binding!!
     private val viewModel: GastosViewModel by viewModels()
-    private lateinit var currentGasto: Gastos
+    private lateinit var currentGasto: GastosFirebase
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,7 +36,7 @@ class EditExpenseFragment : Fragment() {
 
         // Obtiene el gasto desde los argumentos
 
-        currentGasto = arguments?.getParcelable<Gastos>("gasto") ?: run {
+        currentGasto = arguments?.getParcelable<GastosFirebase>("gasto") ?: run {
             Toast.makeText(requireContext(), "Error: No se encontró el gasto", Toast.LENGTH_SHORT).show()
             findNavController().popBackStack()// Navega de regreso si no hay datos
             return
@@ -47,7 +48,6 @@ class EditExpenseFragment : Fragment() {
     // Rellena los campos con los datos del gasto
     private fun setupUI() {
         with(binding) {
-            // Corrección 2: Asegurar que los IDs coincidan con el XML
             nombreGasto.setText(currentGasto.nombreGasto)
             montoGasto.setText(currentGasto.monto.toString())
             descripcionGasto.setText(currentGasto.descripcion)

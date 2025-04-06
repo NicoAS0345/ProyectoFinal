@@ -54,7 +54,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.firebase.auth)
+    implementation(libs.firebase.auth.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -90,4 +90,12 @@ dependencies {
     implementation(libs.compose.foundation)
     implementation(libs.gson)
     implementation(libs.accompanist.swiperefresh)
+
+
+    // Firebase BoM (Bill of Materials)
+    implementation(platform(libs.firebase.bom)) // Usa la referencia correcta
+
+    // Otras dependencias de Firebase (sin versión, la maneja el BOM)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore.ktx)
 }

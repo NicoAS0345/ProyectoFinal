@@ -59,6 +59,6 @@
         android:label="Editar gasto">
         <argument
             android:name="gasto"
-            app:argType="com.nicolearaya.smartbudget.model.Gastos" />
+            app:argType="com.nicolearaya.smartbudget.model.GastosFirebase" />
     </fragment>
 </navigation>

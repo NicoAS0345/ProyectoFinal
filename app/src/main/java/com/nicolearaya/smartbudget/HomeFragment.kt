@@ -21,6 +21,13 @@ import com.nicolearaya.smartbudget.viewmodel.GastosViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import android.app.AlertDialog
+import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import com.google.firebase.Firebase
+import com.google.firebase.app
+import com.google.firebase.firestore.firestore
+import com.google.firebase.options
 import com.nicolearaya.smartbudget.PantallaPrincipalActivity
 
 
@@ -30,14 +37,15 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: GastosViewModel by viewModels()
 
+
     private val adapter = GastosAdapter(
         // Navega al EditExpenseFragment con el gasto seleccionado
         onEditClick = { gasto ->
             val bundle = Bundle().apply {
-                putSerializable("gasto", gasto)
+                putParcelable("gasto", gasto)
             }
             findNavController().navigate(
-                HomeFragmentDirections.actionHomeFragmentToEditExpenseFragment(gasto))
+                R.id.action_homeFragment_to_editExpenseFragment,bundle)
         },
         //Indica que pasa cuando se le dal icono del basurero
         onDeleteClick = { gasto ->
@@ -78,10 +86,15 @@ class HomeFragment : Fragment() {
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.allItems.collect { gastos ->
-                adapter.submitList(gastos)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.gastos.collect { gastos ->
+                    Log.d("HomeFragment", "Actualizando UI con ${gastos.size} gastos")
+                    // Actualiza tu RecyclerView aquí
+                    adapter.submitList(gastos)
+                }
             }
         }
+
 
     }
 
@@ -101,6 +114,7 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
         _binding = null  // Limpiar binding para evitar leaks de memoria
     }
+
 
 
 }

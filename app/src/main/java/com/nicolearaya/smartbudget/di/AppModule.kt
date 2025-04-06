@@ -1,9 +1,17 @@
 package com.nicole_u_latina_araya_solano.di
 
 import android.content.Context
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.nicole_u_latina_araya_solano.data.GastosRepository
 import com.nicole_u_latina_araya_solano.data.database.AppDatabase
 import com.nicole_u_latina_araya_solano.data.database.interfaces.GastosDao
+import com.nicolearaya.smartbudget.dataFirebase.GastosRepositoryFirebase
+import com.nicolearaya.smartbudget.dataFirebase.Gastos_Firebase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,6 +43,40 @@ object AppModule {
     @Singleton
     fun provideItemRepository(gastosDao: GastosDao): GastosRepository {
         return GastosRepository(gastosDao)
+    }
+
+    // Configuración de Firebase
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return Firebase.auth
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirestore(): FirebaseFirestore {
+        return Firebase.firestore.apply {
+            firestoreSettings = FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build()
+        }
+    }
+
+    @Provides
+    @Singleton
+    fun provideGastosFirebase(
+        auth: FirebaseAuth,
+        firestore: FirebaseFirestore
+    ): Gastos_Firebase {
+        return Gastos_Firebase(auth, firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGastosRepositoryFirebase(
+        gastosFirebase: Gastos_Firebase
+    ): GastosRepositoryFirebase {
+        return GastosRepositoryFirebase(gastosFirebase)
     }
 
 }

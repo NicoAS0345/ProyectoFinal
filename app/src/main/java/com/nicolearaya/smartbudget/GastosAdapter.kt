@@ -1,3 +1,4 @@
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,17 +10,18 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.nicolearaya.smartbudget.model.Gastos
 import com.nicolearaya.smartbudget.R
 import com.nicolearaya.smartbudget.databinding.ItemGastoCardBinding
+import com.nicolearaya.smartbudget.model.GastosFirebase
 
 
-class GastosAdapter(private val onEditClick: (Gastos) -> Unit,
-                    private val onDeleteClick: (Gastos) -> Unit,
-                    private val onItemClick: (Gastos) -> Unit) :
+class GastosAdapter(private val onEditClick: (GastosFirebase) -> Unit,
+                    private val onDeleteClick: (GastosFirebase) -> Unit,
+                    private val onItemClick: (GastosFirebase) -> Unit) :
     //Verifica los datos de la lista para indicarlos en las cards
-    ListAdapter<Gastos, GastosAdapter.GastosViewHolder>(DiffCallback()) {
+    ListAdapter<GastosFirebase, GastosAdapter.GastosViewHolder>(DiffCallback()) {
 
 
     inner class GastosViewHolder(private val binding: ItemGastoCardBinding) : RecyclerView.ViewHolder(binding.root) {
-            fun bind(gasto: Gastos) {
+            fun bind(gasto: GastosFirebase) {
                 binding.apply {
                     cardTitle.text = gasto.nombreGasto
                     cardDescription.text = "$${gasto.monto} - ${gasto.fecha}"
@@ -42,15 +44,17 @@ class GastosAdapter(private val onEditClick: (Gastos) -> Unit,
     }
 
     override fun onBindViewHolder(holder: GastosViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        val gasto = getItem(position)
+        Log.d("AdapterDebug", "Mostrando gasto: ${gasto.nombreGasto}")
+        holder.bind(gasto)
     }
 
     // DiffUtil para comparar listas de manera eficiente
-    class DiffCallback : DiffUtil.ItemCallback<Gastos>() {
-        override fun areItemsTheSame(oldItem: Gastos, newItem: Gastos) =
-            oldItem.id == newItem.id
+    class DiffCallback : DiffUtil.ItemCallback<GastosFirebase>() {
+        override fun areItemsTheSame(oldItem: GastosFirebase, newItem: GastosFirebase) =
+            oldItem.id == newItem.id // Comparar por ID de Firebase
 
-        override fun areContentsTheSame(oldItem: Gastos, newItem: Gastos) =
+        override fun areContentsTheSame(oldItem: GastosFirebase, newItem: GastosFirebase) =
             oldItem == newItem
     }
 }
