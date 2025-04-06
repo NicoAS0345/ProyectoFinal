@@ -34,16 +34,22 @@
         android:label="Inicio"
         tools:layout="@layout/fragment_home" >
 
-    <action
-        android:id="@+id/action_to_add_expense"
-        app:destination="@id/addExpenseFragment"
-        app:launchSingleTop="true"
-        app:popUpTo="@id/nav_home"
-        app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_to_add_expense"
+            app:destination="@id/addExpenseFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/nav_home"
+            app:popUpToInclusive="false" />
 
-    <action
-        android:id="@+id/action_homeFragment_to_editExpenseFragment"
-        app:destination="@id/editExpenseFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_editExpenseFragment"
+            app:destination="@id/editExpenseFragment" />
+
+        <action
+            android:id="@+id/action_homeFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment

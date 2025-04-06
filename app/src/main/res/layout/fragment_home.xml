@@ -9,19 +9,22 @@
     tools:context=".ui.home.HomeFragment">
 
     <!-- Ejemplo: TextView de bienvenida -->
+
+    <!-- RecyclerView para mostrar las tarjetas de gastos -->
+
     <TextView
         android:id="@+id/tv_welcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
         android:text="¡Bienvenido a Smart Budget!"
-        android:textSize="18sp"
         android:textColor="@color/black"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp" />
+        app:layout_constraintHorizontal_bias="0.166"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- RecyclerView para mostrar las tarjetas de gastos -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerGastos"
         android:layout_width="0dp"
@@ -32,4 +35,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_welcome"
         tools:listitem="@layout/item_gasto_card" />
+
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="125dp"
+        android:layout_height="35dp"
+        android:layout_gravity="bottom|end"
+        android:text="Cerrar Sesión"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/recyclerGastos"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.466"
+        app:layout_constraintStart_toEndOf="@+id/tv_welcome"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 </androidx.constraintlayout.widget.ConstraintLayout>

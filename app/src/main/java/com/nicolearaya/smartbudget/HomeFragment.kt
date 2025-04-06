@@ -85,6 +85,11 @@ class HomeFragment : Fragment() {
             setHasFixedSize(true)
         }
 
+        // Configura el botón de cerrar sesión
+        binding.btnLogout.setOnClickListener {
+            showLogoutConfirmationDialog()
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.gastos.collect { gastos ->
@@ -97,6 +102,24 @@ class HomeFragment : Fragment() {
 
 
     }
+
+    private fun showLogoutConfirmationDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Cerrar sesión")
+            .setMessage("¿Estás seguro de que quieres salir?")
+            .setPositiveButton("Sí") { _, _ ->
+                viewModel.signOut()
+                navigateToLogin()
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun navigateToLogin() {
+        // Navega al login eliminando el back stack
+        findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
+    }
+
 
     //Maneja la visibilidad del boton de agregar
     override fun onResume() {

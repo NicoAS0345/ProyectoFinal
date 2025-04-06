@@ -73,6 +73,19 @@ class GastosViewModel @Inject constructor(
         firebaseRepository.deleteAllGastos()
     }
 
+    fun signOut() {
+        viewModelScope.launch {
+            try {
+                auth.signOut()
+                // Opcional: Limpiar datos locales al cerrar sesión
+                _gastos.value = emptyList()
+                Log.d("Auth", "Sesión cerrada exitosamente")
+            } catch (e: Exception) {
+                Log.e("Auth", "Error al cerrar sesión", e)
+            }
+        }
+    }
+
 
     //Estos metodos son iguales a los que se han explicado en el DAO y el repositorio pero con la diferencia de que se ejecutan desde el viewmodel
     /*fun insert(gastos: Gastos) = viewModelScope.launch {
