@@ -35,6 +35,18 @@ class GastosViewModel @Inject constructor(
     private val _gastos = MutableStateFlow<List<GastosFirebase>>(emptyList())
     val gastos: StateFlow<List<GastosFirebase>> = _gastos
 
+    //Categorias del select de categorias
+    val categoriasPredeterminadas = listOf(
+        "Comida",
+        "Transporte",
+        "Entretenimiento",
+        "Vivienda",
+        "Salud",
+        "Educación",
+        "Ropa",
+        "Otros" // Esta será la opción para ingresar categoría personalizada
+    )
+
     init {
         Log.d("FirestoreDebug", "Inicializando ViewModel")
         loadGastos()
@@ -85,23 +97,4 @@ class GastosViewModel @Inject constructor(
             }
         }
     }
-
-
-    //Estos metodos son iguales a los que se han explicado en el DAO y el repositorio pero con la diferencia de que se ejecutan desde el viewmodel
-    /*fun insert(gastos: Gastos) = viewModelScope.launch {
-        repository.insert(gastos)
-    }
-
-    fun update(gastos: Gastos) = viewModelScope.launch {
-        repository.update(gastos)
-    }
-    fun delete(gastos: Gastos) {
-        viewModelScope.launch {
-            repository.delete(gastos)
-        }
-    }
-
-    fun deleteAllItems() = viewModelScope.launch {
-        repository.deleteAllItems()
-    }*/
 }

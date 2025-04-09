@@ -46,11 +46,15 @@ object AppModule {
     }
 
     // Configuración de Firebase
+
+    //Proporciona la instancia de Firebase Authentication.
     @Provides
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth {
         return Firebase.auth
     }
+
+    //Proporciona la instancia de Firestore con configuración personalizada.
 
     @Provides
     @Singleton
@@ -62,6 +66,7 @@ object AppModule {
         }
     }
 
+    //Proporciona la clase que maneja las operaciones con gastos en Firestore.
     @Provides
     @Singleton
     fun provideGastosFirebase(
@@ -71,6 +76,7 @@ object AppModule {
         return Gastos_Firebase(auth, firestore)
     }
 
+    //Proporciona el repositorio de Firebase que abstrae las operaciones con gastos.
     @Provides
     @Singleton
     fun provideGastosRepositoryFirebase(

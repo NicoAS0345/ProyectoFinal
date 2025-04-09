@@ -4,11 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nicolearaya.smartbudget.PantallaPrincipalActivity
+import com.nicolearaya.smartbudget.R
 import com.nicolearaya.smartbudget.databinding.FragmentAddExpenseBinding
 import com.nicolearaya.smartbudget.model.Gastos
 import com.nicolearaya.smartbudget.model.GastosFirebase
@@ -41,6 +45,9 @@ class AddExpenseFragment : Fragment() {
     }
 
     private fun setupUI() {
+        // Configura el selector de categorías
+        setupCategorySelector()
+
         //Le dice al boton de guardar que hace cuando se le da click
         binding.btnSaveExpense.setOnClickListener {
             guardarGasto()
@@ -57,6 +64,7 @@ class AddExpenseFragment : Fragment() {
 
         //Llena el modelo
         if (nombre.isNotEmpty() && monto > 0) {
+            //Lo trae de Firebase ya no de la base de datos local
             val nuevoGasto = GastosFirebase(
                 nombreGasto = nombre,
                 descripcion = descripcion,
@@ -65,10 +73,79 @@ class AddExpenseFragment : Fragment() {
                 fecha = fecha
             )
 
+            //Si la categoria viene vacia entonces que la agregue sin categoria
+            if (nuevoGasto.categoria.isNullOrEmpty()) {
+                nuevoGasto.categoria = "Sin categoría"
+            }
+
             viewModel.insert(nuevoGasto)
             findNavController().popBackStack() // Regresa al fragment anterior
         } else {
             Toast.makeText(requireContext(), "Completa todos los campos", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    //Funciones para las categorias y que funcionen para el usuario
+    private fun showCategoryDialog() {
+        val currentCategory = binding.categoriaGasto.text.toString()
+        val categorias = viewModel.categoriasPredeterminadas.toMutableList()
+        var selectedCategory = categorias.firstOrNull { it == currentCategory } ?: ""
+
+        /*MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Seleccionar categoría")
+            .setSingleChoiceItems(categorias.toTypedArray(), categorias.indexOf(selectedCategory)) { dialog, which ->
+                selectedCategory = categorias[which]
+            }
+            .setPositiveButton("Aceptar") { dialog, _ ->
+                if (selectedCategory == "Otros") {
+                    showCustomCategoryDialog()
+                } else {
+                    binding.categoriaGasto.setText(selectedCategory)
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()*/
+    }
+
+    private fun showCustomCategoryDialog() {
+        val input = EditText(requireContext()).apply {
+            hint = "Ingresa tu categoría"
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Nueva categoría")
+            .setView(input)
+            .setPositiveButton("Guardar") { dialog, _ ->
+                val customCategory = input.text.toString().trim()
+                if (customCategory.isNotEmpty()) {
+                    binding.categoriaGasto.setText(customCategory)
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun setupCategorySelector() {
+        val adapter = ArrayAdapter(
+            requireContext(),
+            R.layout.dropdown_menu_item,
+            viewModel.categoriasPredeterminadas
+        )
+
+        binding.categoriaGasto.setAdapter(adapter)
+        binding.categoriaGasto.setOnItemClickListener { _, _, position, _ ->
+            val selected = adapter.getItem(position)
+            if (selected == "Otros") {
+                showCustomCategoryDialog()
+            }
+        }
+
+        // Para evitar que el usuario escriba directamente (excepto en "Otros")
+        binding.categoriaGasto.keyListener = null
+        binding.categoriaGasto.setOnClickListener {
+            showCategoryDialog()
         }
     }
 

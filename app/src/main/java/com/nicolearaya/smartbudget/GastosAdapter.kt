@@ -12,16 +12,18 @@ import com.nicolearaya.smartbudget.R
 import com.nicolearaya.smartbudget.databinding.ItemGastoCardBinding
 import com.nicolearaya.smartbudget.model.GastosFirebase
 
-
+// Adaptador para mostrar una lista de gastos en un RecyclerView
 class GastosAdapter(private val onEditClick: (GastosFirebase) -> Unit,
                     private val onDeleteClick: (GastosFirebase) -> Unit,
                     private val onItemClick: (GastosFirebase) -> Unit) :
     //Verifica los datos de la lista para indicarlos en las cards
     ListAdapter<GastosFirebase, GastosAdapter.GastosViewHolder>(DiffCallback()) {
 
-
+    //ViewHolder que representa cada item de gasto en el RecyclerView.
     inner class GastosViewHolder(private val binding: ItemGastoCardBinding) : RecyclerView.ViewHolder(binding.root) {
-            fun bind(gasto: GastosFirebase) {
+
+        // Vincula los datos del gasto con las vistas de la tarjeta.
+        fun bind(gasto: GastosFirebase) {
                 binding.apply {
                     cardTitle.text = gasto.nombreGasto
                     cardDescription.text = "$${gasto.monto} - ${gasto.fecha}"
@@ -34,6 +36,7 @@ class GastosAdapter(private val onEditClick: (GastosFirebase) -> Unit,
             }
     }
 
+    // Crea nuevos ViewHolders cuando el RecyclerView los necesita.
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GastosViewHolder {
         val binding = ItemGastoCardBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -49,7 +52,7 @@ class GastosAdapter(private val onEditClick: (GastosFirebase) -> Unit,
         holder.bind(gasto)
     }
 
-    // DiffUtil para comparar listas de manera eficiente
+    // Clase para comparar items y determinar cambios en la lista.
     class DiffCallback : DiffUtil.ItemCallback<GastosFirebase>() {
         override fun areItemsTheSame(oldItem: GastosFirebase, newItem: GastosFirebase) =
             oldItem.id == newItem.id // Comparar por ID de Firebase

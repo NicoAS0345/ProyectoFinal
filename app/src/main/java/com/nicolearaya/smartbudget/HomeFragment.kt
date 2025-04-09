@@ -90,6 +90,7 @@ class HomeFragment : Fragment() {
             showLogoutConfirmationDialog()
         }
 
+        //revisa los cambios que han sucedido en el recycler view
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.gastos.collect { gastos ->
@@ -103,7 +104,9 @@ class HomeFragment : Fragment() {
 
     }
 
+    //Funcion para poder cerrar la sesión actiba
     private fun showLogoutConfirmationDialog() {
+        //muestra mensaje de si esta seguro de cerrar la sesión
         AlertDialog.Builder(requireContext())
             .setTitle("Cerrar sesión")
             .setMessage("¿Estás seguro de que quieres salir?")

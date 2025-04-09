@@ -21,17 +21,6 @@ class GastosRepositoryFirebase @Inject constructor(
 
     fun getAllGastosFlow(): Flow<List<GastosFirebase>> {
         return gastosFirebase.getGastosFlow()
-        /*return callbackFlow {
-            val listener = firestore.collection("gastos")
-                .whereEqualTo("userId", auth.currentUser?.uid)
-                .addSnapshotListener { snapshot, error ->
-                    if (error != null) return@addSnapshotListener
-                    val gastos = snapshot?.toObjects(GastosFirebase::class.java) ?: emptyList()
-                    trySend(gastos).isSuccess
-                }
-
-            awaitClose { /* Limpieza */ }
-        }*/
     }
 
     suspend fun insert(gasto: GastosFirebase) {
