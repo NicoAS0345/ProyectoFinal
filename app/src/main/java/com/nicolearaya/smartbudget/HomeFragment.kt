@@ -21,14 +21,21 @@ import com.nicolearaya.smartbudget.viewmodel.GastosViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import android.app.AlertDialog
+import android.content.Context
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.google.android.material.search.SearchView
 import com.google.firebase.Firebase
 import com.google.firebase.app
 import com.google.firebase.firestore.firestore
 import com.google.firebase.options
 import com.nicolearaya.smartbudget.PantallaPrincipalActivity
+import com.nicolearaya.smartbudget.model.GastosFirebase
 
 
 @AndroidEntryPoint
@@ -36,6 +43,7 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private val viewModel: GastosViewModel by viewModels()
+    private var gastosOriginales: List<GastosFirebase> = emptyList()
 
 
     private val adapter = GastosAdapter(
@@ -77,6 +85,7 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupSearch()
 
         // Configura RecyclerView y observa cambios en la lista de gastos
         binding.recyclerGastos.apply {
@@ -95,6 +104,7 @@ class HomeFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.gastos.collect { gastos ->
                     Log.d("HomeFragment", "Actualizando UI con ${gastos.size} gastos")
+                    gastosOriginales = gastos
                     // Actualiza tu RecyclerView aquí
                     adapter.submitList(gastos)
                 }
@@ -102,6 +112,47 @@ class HomeFragment : Fragment() {
         }
 
 
+    }
+
+    private fun setupSearch() {
+        binding.Busqueda.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                filterGastos(s.toString())
+            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        binding.Busqueda.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                hideKeyboard()
+                true
+            } else {
+                false
+            }
+        }
+    }
+
+    private fun filterGastos(query: String) {
+        Log.d("BUSQUEDA", "Buscando: '$query'")
+        Log.d("BUSQUEDA", "Total gastos: ${gastosOriginales.size}")
+
+        val filtered = if (query.isEmpty()) {
+            gastosOriginales
+        } else {
+            gastosOriginales.filter {
+                Log.d("BUSQUEDA", "Comparando: ${it.nombreGasto}")
+                it.nombreGasto.contains(query, true)
+            }.also {
+                Log.d("BUSQUEDA", "Encontrados: ${it.size}")
+            }
+        }
+        adapter.submitList(filtered)
+    }
+
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(binding.Busqueda.windowToken, 0)
     }
 
     //Funcion para poder cerrar la sesión actiba
@@ -139,6 +190,21 @@ class HomeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null  // Limpiar binding para evitar leaks de memoria
+    }
+
+    //Funciones para el teclado
+    // Extensiones para manejo del teclado
+    fun Fragment.showKeyboard(view: View) {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    fun Fragment.hideKeyboard() {
+        val view = activity?.currentFocus
+        if (view != null) {
+            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
     }
 
 

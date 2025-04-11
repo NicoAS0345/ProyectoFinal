@@ -1,14 +1,19 @@
 package com.nicolearaya.smartbudget.ui.expenses
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nicolearaya.smartbudget.PantallaPrincipalActivity
+import com.nicolearaya.smartbudget.R
 import com.nicolearaya.smartbudget.databinding.FragmentEditExpenseBinding
 import com.nicolearaya.smartbudget.model.Gastos
 import com.nicolearaya.smartbudget.model.GastosFirebase
@@ -47,6 +52,8 @@ class EditExpenseFragment : Fragment() {
 
     // Rellena los campos con los datos del gasto
     private fun setupUI() {
+        setupCategorySelector()
+
         with(binding) {
             nombreGasto.setText(currentGasto.nombreGasto)
             montoGasto.setText(currentGasto.monto.toString())
@@ -75,6 +82,87 @@ class EditExpenseFragment : Fragment() {
                 findNavController().popBackStack() // Regresa al fragmento anterior
             }
         }
+    }
+
+    private fun setupCategorySelector() {
+            // 1. Obtener categoría actual del gasto
+            val currentCategory = currentGasto.categoria ?: ""
+
+            val adapter = ArrayAdapter(
+                requireContext(),
+                R.layout.dropdown_menu_item,
+                viewModel.categoriasPredeterminadas
+            )
+
+            binding.categoriaGasto.setAdapter(adapter)
+            binding.categoriaGasto.setOnItemClickListener { _, _, position, _ ->
+                val selected = adapter.getItem(position)
+                if (selected == "Otros") {
+                    showCustomCategoryDialog()
+                }
+            }
+
+            // Para evitar que el usuario escriba directamente (excepto en "Otros")
+            binding.categoriaGasto.keyListener = null
+            binding.categoriaGasto.setOnClickListener {
+                showCategoryDialog()
+            }
+    }
+    private fun showCategoryDialog() {
+        val currentCategory = binding.categoriaGasto.text.toString()
+        val categorias = viewModel.categoriasPredeterminadas.toMutableList()
+        var selectedCategory = categorias.firstOrNull { it == currentCategory } ?: ""
+
+        /*MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Seleccionar categoría")
+            .setSingleChoiceItems(categorias.toTypedArray(), categorias.indexOf(selectedCategory)) { dialog, which ->
+                selectedCategory = categorias[which]
+            }
+            .setPositiveButton("Aceptar") { dialog, _ ->
+                if (selectedCategory == "Otros") {
+                    showCustomCategoryDialog()
+                } else {
+                    binding.categoriaGasto.setText(selectedCategory)
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()*/
+    }
+
+    private fun showSimpleCategoryDialog() {
+        val categories = viewModel.categoriasPredeterminadas.toMutableList()
+        val currentCategory = currentGasto.categoria ?: ""
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Seleccionar categoría")
+            .setItems(categories.toTypedArray()) { _, which ->
+                binding.categoriaGasto.setText(categories[which])
+            }
+            .setNeutralButton("Otros") { _, _ ->
+                showCustomCategoryDialog()
+            }
+            .show()
+    }
+
+
+    private fun showCustomCategoryDialog() {
+        val input = EditText(requireContext()).apply {
+            hint = "Ingresa tu categoría"
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Nueva categoría")
+            .setView(input)
+            .setPositiveButton("Guardar") { dialog, _ ->
+                val customCategory = input.text.toString().trim()
+                if (customCategory.isNotEmpty()) {
+                    binding.categoriaGasto.setText(customCategory)
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
 

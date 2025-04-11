@@ -25,15 +25,31 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Barra de búsqueda -->
+
+    <EditText
+        android:id="@+id/Busqueda"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:hint="Buscar gastos por nombre..."
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_welcome"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerGastos"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="392dp"
+        android:layout_height="619dp"
         android:layout_margin="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_welcome"
+        app:layout_constraintTop_toBottomOf="@+id/Busqueda"
+        app:layout_constraintVertical_bias="0.295"
         tools:listitem="@layout/item_gasto_card" />
 
     <Button
@@ -48,5 +64,5 @@
         app:layout_constraintHorizontal_bias="0.466"
         app:layout_constraintStart_toEndOf="@+id/tv_welcome"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="0.28" />
 </androidx.constraintlayout.widget.ConstraintLayout>
