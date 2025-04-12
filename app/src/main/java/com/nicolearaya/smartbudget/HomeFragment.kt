@@ -44,7 +44,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: GastosViewModel by viewModels()
     private var gastosOriginales: List<GastosFirebase> = emptyList()
-
+    private var categoriasSeleccionadas: MutableSet<String> = mutableSetOf()
 
     private val adapter = GastosAdapter(
         // Navega al EditExpenseFragment con el gasto seleccionado
@@ -86,6 +86,8 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupSearch()
+        setupFilterButton()
+
 
         // Configura RecyclerView y observa cambios en la lista de gastos
         binding.recyclerGastos.apply {
@@ -137,16 +139,14 @@ class HomeFragment : Fragment() {
         Log.d("BUSQUEDA", "Buscando: '$query'")
         Log.d("BUSQUEDA", "Total gastos: ${gastosOriginales.size}")
 
-        val filtered = if (query.isEmpty()) {
-            gastosOriginales
-        } else {
-            gastosOriginales.filter {
-                Log.d("BUSQUEDA", "Comparando: ${it.nombreGasto}")
-                it.nombreGasto.contains(query, true)
-            }.also {
-                Log.d("BUSQUEDA", "Encontrados: ${it.size}")
-            }
+        val filtered = gastosOriginales.filter { gasto ->
+            val matchesSearch = query.isEmpty() || gasto.nombreGasto.contains(query, true)
+            val matchesCategories = categoriasSeleccionadas.isEmpty() ||
+                    (gasto.categoria?.let { categoriasSeleccionadas.contains(it) } ?: false)
+
+            matchesSearch && matchesCategories
         }
+
         adapter.submitList(filtered)
     }
 
@@ -172,6 +172,61 @@ class HomeFragment : Fragment() {
     private fun navigateToLogin() {
         // Navega al login eliminando el back stack
         findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
+    }
+
+    //Funciones para manejar el filtro por categoria
+    private fun setupFilterButton() {
+        binding.filtro.setOnClickListener {
+            showCategoryFilterDialog()
+        }
+    }
+    private fun showCategoryFilterDialog() {
+        val categorias = viewModel.categoriasPredeterminadas.toTypedArray()
+        val checkedItems = BooleanArray(categorias.size) { index ->
+            categoriasSeleccionadas.contains(categorias[index])
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Filtrar por categorías")
+            .setMultiChoiceItems(categorias, checkedItems) { _, which, isChecked ->
+                val categoria = categorias[which]
+                if (isChecked) {
+                    categoriasSeleccionadas.add(categoria)
+                } else {
+                    categoriasSeleccionadas.remove(categoria)
+                }
+            }
+            .setPositiveButton("Aplicar") { _, _ ->
+                applyCategoryFilter()
+            }
+            .setNegativeButton("Cancelar", null)
+            .setNeutralButton("Limpiar") { _, _ ->
+                categoriasSeleccionadas.clear()
+                applyCategoryFilter()
+            }
+            .show()
+    }
+
+    private fun applyCategoryFilter() {
+        val query = binding.Busqueda.text.toString()
+
+        val filtered = gastosOriginales.filter { gasto ->
+            val matchesSearch = query.isEmpty() || gasto.nombreGasto.contains(query, true)
+            val matchesCategories = categoriasSeleccionadas.isEmpty() ||
+                    (gasto.categoria?.let { categoriasSeleccionadas.contains(it) } ?: false)
+
+            matchesSearch && matchesCategories
+        }
+
+        adapter.submitList(filtered)
+
+        // Mostrar feedback al usuario
+        val filterStatus = if (categoriasSeleccionadas.isEmpty()) {
+            "Mostrando todos los gastos"
+        } else {
+            "Filtrado por: ${categoriasSeleccionadas.joinToString(", ")}"
+        }
+        Toast.makeText(requireContext(), filterStatus, Toast.LENGTH_SHORT).show()
     }
 
 

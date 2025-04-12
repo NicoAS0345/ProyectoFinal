@@ -8,61 +8,68 @@
     android:background="@color/white"
     tools:context=".ui.home.HomeFragment">
 
-    <!-- Ejemplo: TextView de bienvenida -->
+    <!-- TextView de bienvenida -->
 
-    <!-- RecyclerView para mostrar las tarjetas de gastos -->
-
+    <!-- Barra de búsqueda -->
     <TextView
         android:id="@+id/tv_welcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="28dp"
         android:text="¡Bienvenido a Smart Budget!"
         android:textColor="@color/black"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.166"
+        app:layout_constraintHorizontal_bias="0.086"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Barra de búsqueda -->
 
     <EditText
         android:id="@+id/Busqueda"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
         android:hint="Buscar gastos por nombre..."
         android:imeOptions="actionSearch"
         android:inputType="text"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/filtro"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_welcome"/>
+        app:layout_constraintTop_toBottomOf="@id/tv_welcome" />
 
+    <!-- Botón de filtro -->
+    <Button
+        android:id="@+id/filtro"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
+        android:text="Filtro"
+        app:layout_constraintBottom_toBottomOf="@id/Busqueda"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/Busqueda" />
+
+    <!-- RecyclerView para las cards -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerGastos"
-        android:layout_width="392dp"
-        android:layout_height="619dp"
-        android:layout_margin="8dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Busqueda"
-        app:layout_constraintVertical_bias="0.295"
+        app:layout_constraintTop_toBottomOf="@id/Busqueda"
         tools:listitem="@layout/item_gasto_card" />
 
+    <!-- Botón de cerrar sesión -->
     <Button
         android:id="@+id/btnLogout"
-        android:layout_width="125dp"
+        android:layout_width="wrap_content"
         android:layout_height="35dp"
-        android:layout_gravity="bottom|end"
+        android:layout_marginTop="22dp"
+        android:layout_marginEnd="16dp"
         android:text="Cerrar Sesión"
         android:textSize="12sp"
-        app:layout_constraintBottom_toTopOf="@+id/recyclerGastos"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.466"
-        app:layout_constraintStart_toEndOf="@+id/tv_welcome"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.28" />
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

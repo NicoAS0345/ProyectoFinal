@@ -24,16 +24,18 @@ class GastosAdapter(private val onEditClick: (GastosFirebase) -> Unit,
 
         // Vincula los datos del gasto con las vistas de la tarjeta.
         fun bind(gasto: GastosFirebase) {
-                binding.apply {
-                    cardTitle.text = gasto.nombreGasto
-                    cardDescription.text = "$${gasto.monto} - ${gasto.fecha}"
+            binding.apply {
+                cardTitle.text = gasto.nombreGasto
+                // Agrega la categoría si está disponible
+                val descripcion = "$${gasto.monto} - ${gasto.fecha}" +
+                        (gasto.categoria?.let { " - $it" } ?: "")
+                cardDescription.text = descripcion
 
-                    // Listeners para botones de editar/eliminar y clic en la tarjeta
-                    root.setOnClickListener { onItemClick(gasto) }
-                    btnEdit.setOnClickListener { onEditClick(gasto) }
-                    btnDelete.setOnClickListener { onDeleteClick(gasto) }
-                }
+                root.setOnClickListener { onItemClick(gasto) }
+                btnEdit.setOnClickListener { onEditClick(gasto) }
+                btnDelete.setOnClickListener { onDeleteClick(gasto) }
             }
+        }
     }
 
     // Crea nuevos ViewHolders cuando el RecyclerView los necesita.
@@ -60,4 +62,6 @@ class GastosAdapter(private val onEditClick: (GastosFirebase) -> Unit,
         override fun areContentsTheSame(oldItem: GastosFirebase, newItem: GastosFirebase) =
             oldItem == newItem
     }
+
+
 }
