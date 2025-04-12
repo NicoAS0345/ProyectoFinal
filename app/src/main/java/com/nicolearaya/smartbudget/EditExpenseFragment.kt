@@ -52,7 +52,6 @@ class EditExpenseFragment : Fragment() {
 
     // Rellena los campos con los datos del gasto
     private fun setupUI() {
-        setupCategorySelector()
 
         with(binding) {
             nombreGasto.setText(currentGasto.nombreGasto)
@@ -60,6 +59,8 @@ class EditExpenseFragment : Fragment() {
             descripcionGasto.setText(currentGasto.descripcion)
             categoriaGasto.setText(currentGasto.categoria)
             fechaGasto.setText(currentGasto.fecha)
+
+            setupCategorySelector()
 
             btnSaveEditExpense.setOnClickListener {
                 // Validación básica
@@ -82,69 +83,44 @@ class EditExpenseFragment : Fragment() {
                 findNavController().popBackStack() // Regresa al fragmento anterior
             }
         }
+
+
     }
 
     private fun setupCategorySelector() {
-            // 1. Obtener categoría actual del gasto
-            val currentCategory = currentGasto.categoria ?: ""
-
-            val adapter = ArrayAdapter(
-                requireContext(),
-                R.layout.dropdown_menu_item,
-                viewModel.categoriasPredeterminadas
-            )
-
-            binding.categoriaGasto.setAdapter(adapter)
-            binding.categoriaGasto.setOnItemClickListener { _, _, position, _ ->
-                val selected = adapter.getItem(position)
-                if (selected == "Otros") {
-                    showCustomCategoryDialog()
-                }
-            }
-
-            // Para evitar que el usuario escriba directamente (excepto en "Otros")
-            binding.categoriaGasto.keyListener = null
-            binding.categoriaGasto.setOnClickListener {
-                showCategoryDialog()
-            }
-    }
-    private fun showCategoryDialog() {
         val currentCategory = binding.categoriaGasto.text.toString()
         val categorias = viewModel.categoriasPredeterminadas.toMutableList()
-        var selectedCategory = categorias.firstOrNull { it == currentCategory } ?: ""
 
-        /*MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Seleccionar categoría")
-            .setSingleChoiceItems(categorias.toTypedArray(), categorias.indexOf(selectedCategory)) { dialog, which ->
-                selectedCategory = categorias[which]
-            }
-            .setPositiveButton("Aceptar") { dialog, _ ->
-                if (selectedCategory == "Otros") {
-                    showCustomCategoryDialog()
-                } else {
-                    binding.categoriaGasto.setText(selectedCategory)
-                }
-                dialog.dismiss()
-            }
-            .setNegativeButton("Cancelar", null)
-            .show()*/
-    }
+        // Asegúrate de que la categoría actual esté en la lista del dropdown
+        if (currentCategory.isNotEmpty() && !categorias.contains(currentCategory)) {
+            categorias.add(0, currentCategory)
+        }
 
-    private fun showSimpleCategoryDialog() {
-        val categories = viewModel.categoriasPredeterminadas.toMutableList()
-        val currentCategory = currentGasto.categoria ?: ""
+        val adapter = ArrayAdapter(
+            requireContext(),
+            R.layout.dropdown_menu_item,
+            categorias
+        )
 
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Seleccionar categoría")
-            .setItems(categories.toTypedArray()) { _, which ->
-                binding.categoriaGasto.setText(categories[which])
-            }
-            .setNeutralButton("Otros") { _, _ ->
+        binding.categoriaGasto.setAdapter(adapter)
+
+        // Postergar el setText a cuando la vista ya esté completamente renderizada
+        binding.categoriaGasto.post {
+            binding.categoriaGasto.setText(currentCategory, false)
+        }
+
+        // Mostrar el menú al hacer click
+        binding.categoriaGasto.setOnClickListener {
+            binding.categoriaGasto.showDropDown()
+        }
+
+        binding.categoriaGasto.setOnItemClickListener { _, _, position, _ ->
+            val selected = adapter.getItem(position)
+            if (selected == "Otros") {
                 showCustomCategoryDialog()
             }
-            .show()
+        }
     }
-
 
     private fun showCustomCategoryDialog() {
         val input = EditText(requireContext()).apply {
