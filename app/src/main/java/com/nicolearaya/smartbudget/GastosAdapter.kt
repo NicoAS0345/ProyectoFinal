@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.nicolearaya.smartbudget.DateUtils
 import com.nicolearaya.smartbudget.model.Gastos
 import com.nicolearaya.smartbudget.R
 import com.nicolearaya.smartbudget.databinding.ItemGastoCardBinding
@@ -26,8 +27,13 @@ class GastosAdapter(private val onEditClick: (GastosFirebase) -> Unit,
         fun bind(gasto: GastosFirebase) {
             binding.apply {
                 cardTitle.text = gasto.nombreGasto
+
+                //Muestra la fecha
+                val fechaFormateada = DateUtils.formatTimestampForDisplay(gasto.fechaCreacion)
+
+
                 // Agrega la categoría si está disponible
-                val descripcion = "$${gasto.monto} - ${gasto.fecha}" +
+                val descripcion = "$${gasto.monto} - $fechaFormateada" +
                         (gasto.categoria?.let { " - $it" } ?: "")
                 cardDescription.text = descripcion
 

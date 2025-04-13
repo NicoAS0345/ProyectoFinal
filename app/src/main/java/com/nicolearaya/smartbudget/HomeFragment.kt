@@ -34,6 +34,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.app
 import com.google.firebase.firestore.firestore
 import com.google.firebase.options
+import com.nicolearaya.smartbudget.DateUtils
 import com.nicolearaya.smartbudget.PantallaPrincipalActivity
 import com.nicolearaya.smartbudget.model.GastosFirebase
 
@@ -101,12 +102,22 @@ class HomeFragment : Fragment() {
             showLogoutConfirmationDialog()
         }
 
+        binding.tvWelcome.text = "¡Bienvenido a Smart Budget! (${DateUtils.getCurrentMonthYear()})"
+
         //revisa los cambios que han sucedido en el recycler view
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.gastos.collect { gastos ->
-                    Log.d("HomeFragment", "Actualizando UI con ${gastos.size} gastos")
+                    Log.d("HomeFragment", "Total gastos a mostrar: ${gastos.size}")
+                    if (gastos.isEmpty()) {
+                        Log.d("HomeFragment", "La lista de gastos está vacía")
+                    } else {
+                        gastos.forEach { gasto ->
+                            Log.d("HomeFragment", "Mostrando: ${gasto.nombreGasto}")
+                        }
+                    }
                     gastosOriginales = gastos
+
                     // Actualiza tu RecyclerView aquí
                     adapter.submitList(gastos)
                 }

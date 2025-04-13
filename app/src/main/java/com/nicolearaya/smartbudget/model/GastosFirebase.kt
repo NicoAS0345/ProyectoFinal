@@ -14,12 +14,11 @@ data class GastosFirebase(
     var descripcion: String = " ",
     var categoria: String= " ",
     var monto: Double = 0.0,
-    var fecha: String = "" /*SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())*/,
     var isSelected: Boolean=false,
     var userId: String = " ",
     var fechaCreacion: Timestamp = Timestamp(Date()) // Para ordenar
 
 ):Parcelable, Serializable
 {
-    constructor() : this ("", "", "","",0.0,"", false, "",Timestamp(Date()))
+    constructor() : this ("", "", "","",0.0, false, "",Timestamp(Date()))
 }

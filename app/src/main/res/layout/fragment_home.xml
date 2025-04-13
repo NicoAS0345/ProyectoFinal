@@ -50,18 +50,21 @@
         app:layout_constraintTop_toTopOf="@id/Busqueda" />
 
     <!-- RecyclerView para las cards -->
+
+    <!-- Botón de cerrar sesión -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerGastos"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="412dp"
+        android:layout_height="588dp"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.428"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/Busqueda"
+        app:layout_constraintVertical_bias="0.012"
         tools:listitem="@layout/item_gasto_card" />
 
-    <!-- Botón de cerrar sesión -->
     <Button
         android:id="@+id/btnLogout"
         android:layout_width="wrap_content"

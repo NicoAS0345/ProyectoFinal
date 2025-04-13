@@ -69,8 +69,7 @@ class AddExpenseFragment : Fragment() {
                 nombreGasto = nombre,
                 descripcion = descripcion,
                 categoria = categoria,
-                monto = monto,
-                fecha = fecha
+                monto = monto
             )
 
             //Si la categoria viene vacia entonces que la agregue sin categoria

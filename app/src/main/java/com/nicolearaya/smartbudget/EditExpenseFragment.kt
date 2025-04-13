@@ -58,7 +58,6 @@ class EditExpenseFragment : Fragment() {
             montoGasto.setText(currentGasto.monto.toString())
             descripcionGasto.setText(currentGasto.descripcion)
             categoriaGasto.setText(currentGasto.categoria)
-            fechaGasto.setText(currentGasto.fecha)
 
             setupCategorySelector()
 
@@ -74,8 +73,7 @@ class EditExpenseFragment : Fragment() {
                     nombreGasto = nombreGasto.text.toString(),
                     monto = montoGasto.text.toString().toDoubleOrNull() ?: 0.0,
                     descripcion = descripcionGasto.text.toString(),
-                    categoria = categoriaGasto.text.toString(),
-                    fecha = fechaGasto.text.toString()
+                    categoria = categoriaGasto.text.toString()
                 )
 
                 viewModel.update(updatedGasto) // Actualiza en la base de datos

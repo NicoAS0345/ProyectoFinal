@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.nicolearaya.smartbudget.DateUtils
 import com.nicolearaya.smartbudget.dataFirebase.GastosRepositoryFirebase
 import com.nicolearaya.smartbudget.model.GastosFirebase
 import kotlinx.coroutines.flow.asStateFlow
@@ -53,18 +54,25 @@ class GastosViewModel @Inject constructor(
     }
 
     private fun loadGastos() {
-        viewModelScope.launch {  // <-- Esto crea el contexto de corrutina necesario
+        viewModelScope.launch {
             try {
-                firebaseRepository.getAllGastosFlow().collect { gastosList: List<GastosFirebase> ->  // <-- Ahora collect funciona
-                    _gastos.value = gastosList
-                    Log.d("Firestore", "Datos actualizados: ${gastosList.size} elementos")
+                firebaseRepository.getAllGastosFlow().collect { gastosList ->
+                    val gastosFiltrados = gastosList
+                        .filter { gasto ->
+                            // Filtra por usuario actual y mes actual
+                            gasto.userId == auth.currentUser?.uid &&
+                                    DateUtils.isCurrentMonth(gasto.fechaCreacion)
+                        }
+                        .sortedByDescending { it.fechaCreacion }
+
+                    _gastos.value = gastosFiltrados
+                    Log.d("ViewModel", "Mostrando ${gastosFiltrados.size} gastos del mes actual")
                 }
             } catch (e: Exception) {
-                Log.e("Firestore", "Error al recolectar datos", e)
+                Log.e("ViewModel", "Error al cargar gastos", e)
             }
         }
     }
-
     val allGastos: Flow<List<GastosFirebase>> = firebaseRepository.getAllGastosFlow()
 
     // Métodos para Firebase
