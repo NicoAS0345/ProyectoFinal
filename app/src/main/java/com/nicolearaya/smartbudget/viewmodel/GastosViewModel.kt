@@ -23,6 +23,10 @@ import com.nicolearaya.smartbudget.model.GastosFirebase
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 //Esta va a ser la clase que permite que el viewmodel se comunique con el repositorio y la informacion se inyecte a la capa de datos
 @HiltViewModel
@@ -103,6 +107,30 @@ class GastosViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e("Auth", "Error al cerrar sesión", e)
             }
+        }
+    }
+
+    // Agrega esta función
+    fun getGastosGroupedByMonth(): Flow<List<Any>> {
+        return allGastos.map { gastos ->
+            gastos
+                .filter { it.userId == auth.currentUser?.uid }
+                .groupBy { gasto ->
+                    val calendar = Calendar.getInstance().apply {
+                        time = gasto.fechaCreacion.toDate()
+                    }
+                    "${calendar.get(Calendar.YEAR)}-${calendar.get(Calendar.MONTH)}"
+                }
+                .entries
+                .sortedByDescending { it.key }
+                .flatMap { entry ->
+                    val calendar = Calendar.getInstance().apply {
+                        time = entry.value.first().fechaCreacion.toDate()
+                    }
+                    val monthName = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+                        .format(calendar.time)
+                    listOf(monthName) + entry.value.sortedByDescending { it.fechaCreacion }
+                }
         }
     }
 }

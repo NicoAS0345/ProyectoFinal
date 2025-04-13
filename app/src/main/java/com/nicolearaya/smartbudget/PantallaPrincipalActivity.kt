@@ -76,6 +76,10 @@ class PantallaPrincipalActivity : AppCompatActivity() {
                     navController.popBackStack(R.id.nav_home, false)
                     true
                 }
+                R.id.nav_history -> {
+                    navController.navigate(R.id.historyFragment)
+                    true
+                }
                 else -> false
             }
         }
@@ -86,9 +90,19 @@ class PantallaPrincipalActivity : AppCompatActivity() {
         }
 
         // Ocultar FAB en pantallas que no son el home
+        // En PantallaPrincipalActivity.kt
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            binding.anadirGasto.visibility =
-                if (destination.id == R.id.nav_home) View.VISIBLE else View.GONE
+            when (destination.id) {
+                R.id.loginFragment -> {
+                    binding.barraNavegacion.visibility = View.GONE
+                    binding.anadirGasto.visibility = View.GONE
+                }
+                else -> {
+                    binding.barraNavegacion.visibility = View.VISIBLE
+                    binding.anadirGasto.visibility =
+                        if (destination.id == R.id.nav_home) View.VISIBLE else View.GONE
+                }
+            }
         }
     }
 

@@ -67,4 +67,16 @@
             android:name="gasto"
             app:argType="com.nicolearaya.smartbudget.model.GastosFirebase" />
     </fragment>
+
+    <!-- Agrega esto junto con tus otros fragments -->
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.nicolearaya.smartbudget.ui.history.HistoryFragment"
+        android:label="Historial"
+        tools:layout="@layout/fragment_history">
+
+        <action
+            android:id="@+id/action_historyFragment_to_editExpenseFragment"
+            app:destination="@id/editExpenseFragment" />
+    </fragment>
 </navigation>

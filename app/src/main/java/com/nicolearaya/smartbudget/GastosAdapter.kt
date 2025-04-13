@@ -18,7 +18,25 @@ class GastosAdapter(private val onEditClick: (GastosFirebase) -> Unit,
                     private val onDeleteClick: (GastosFirebase) -> Unit,
                     private val onItemClick: (GastosFirebase) -> Unit) :
     //Verifica los datos de la lista para indicarlos en las cards
-    ListAdapter<GastosFirebase, GastosAdapter.GastosViewHolder>(DiffCallback()) {
+     ListAdapter<Any, RecyclerView.ViewHolder>(DiffCallback()) {
+
+    companion object {
+        private const val TYPE_HEADER = 0
+        private const val TYPE_ITEM = 1
+    }
+
+    inner class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        fun bind(header: String) {
+            (itemView as TextView).text = header
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when (getItem(position)) {
+            is String -> TYPE_HEADER
+            else -> TYPE_ITEM
+        }
+    }
 
     //ViewHolder que representa cada item de gasto en el RecyclerView.
     inner class GastosViewHolder(private val binding: ItemGastoCardBinding) : RecyclerView.ViewHolder(binding.root) {
@@ -45,29 +63,43 @@ class GastosAdapter(private val onEditClick: (GastosFirebase) -> Unit,
     }
 
     // Crea nuevos ViewHolders cuando el RecyclerView los necesita.
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GastosViewHolder {
-        val binding = ItemGastoCardBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        )
-        return GastosViewHolder(binding)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == TYPE_HEADER) {
+            HeaderViewHolder(
+                LayoutInflater.from(parent.context)
+                    .inflate(R.layout.list_month_header, parent, false)
+            )
+        } else {
+            GastosViewHolder(
+                ItemGastoCardBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+            )
+        }
     }
 
-    override fun onBindViewHolder(holder: GastosViewHolder, position: Int) {
-        val gasto = getItem(position)
-        Log.d("AdapterDebug", "Mostrando gasto: ${gasto.nombreGasto}")
-        holder.bind(gasto)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (holder) {
+            is HeaderViewHolder -> holder.bind(getItem(position) as String)
+            is GastosViewHolder -> holder.bind(getItem(position) as GastosFirebase)
+        }
     }
 
-    // Clase para comparar items y determinar cambios en la lista.
-    class DiffCallback : DiffUtil.ItemCallback<GastosFirebase>() {
-        override fun areItemsTheSame(oldItem: GastosFirebase, newItem: GastosFirebase) =
-            oldItem.id == newItem.id // Comparar por ID de Firebase
+    class DiffCallback : DiffUtil.ItemCallback<Any>() {
+        override fun areItemsTheSame(oldItem: Any, newItem: Any): Boolean {
+            return when {
+                oldItem is String && newItem is String -> oldItem == newItem
+                oldItem is GastosFirebase && newItem is GastosFirebase -> oldItem.id == newItem.id
+                else -> false
+            }
+        }
 
-        override fun areContentsTheSame(oldItem: GastosFirebase, newItem: GastosFirebase) =
-            oldItem == newItem
+        override fun areContentsTheSame(oldItem: Any, newItem: Any): Boolean {
+            return oldItem == newItem
+        }
     }
-
-
 }
+
+
