@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.nicolearaya.smartbudget.DateUtils
+import com.nicolearaya.smartbudget.dataFirebase.BudgetRepositoryFirebase
 import com.nicolearaya.smartbudget.dataFirebase.GastosRepositoryFirebase
 import com.nicolearaya.smartbudget.model.GastosFirebase
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +33,7 @@ import java.util.Locale
 @HiltViewModel
 class GastosViewModel @Inject constructor(
     private val firebaseRepository: GastosRepositoryFirebase,
+    private val budgetRepository: BudgetRepositoryFirebase,
     private val auth: FirebaseAuth
 ): ViewModel()
 {
@@ -83,14 +85,33 @@ class GastosViewModel @Inject constructor(
     fun insert(gasto: GastosFirebase) = viewModelScope.launch {
         gasto.userId = auth.currentUser?.uid ?: ""
         firebaseRepository.insert(gasto)
+        budgetRepository.updateCurrentSpending(gasto.monto, true)
     }
 
     fun update(gasto: GastosFirebase) = viewModelScope.launch {
-        firebaseRepository.update(gasto)
+        try {
+            // Obtenemos el gasto anterior
+            val oldGasto = firebaseRepository.getGastoById(gasto.id)
+
+            // Actualizamos el gasto
+            firebaseRepository.update(gasto)
+
+            // Actualizamos el presupuesto
+            oldGasto?.let {
+                budgetRepository.updateCurrentSpending(it.monto, false) // Restamos el monto antiguo
+                budgetRepository.updateCurrentSpending(gasto.monto, true) // Sumamos el nuevo monto
+            } ?: run {
+                // Si no encontramos el gasto anterior, solo sumamos el nuevo
+                budgetRepository.updateCurrentSpending(gasto.monto, true)
+            }
+        } catch (e: Exception) {
+            Log.e("GastosViewModel", "Error al actualizar gasto", e)
+        }
     }
 
     fun delete(gasto: GastosFirebase) = viewModelScope.launch {
         firebaseRepository.delete(gasto)
+        budgetRepository.updateCurrentSpending(gasto.monto, false)
     }
 
     fun deleteAllGastos() = viewModelScope.launch {

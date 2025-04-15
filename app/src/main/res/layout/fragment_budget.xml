@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".ui.budget.BudgetFragment">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:text="Tu Presupuesto Mensual"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_budget"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_title">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Presupuesto Total"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tv_monthly_budget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="$0.00"
+                android:textColor="@color/primaryColor"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- CardView para gastos actuales -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_spending"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_budget">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Gastos Actuales"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tv_current_spending"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="$0.00"
+                android:textColor="@color/red"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_remaining"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_spending">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Saldo Restante"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tv_remaining_budget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="$0.00"
+                android:textColor="@color/green"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress_budget"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="32dp"
+        app:indicatorColor="@color/primaryColor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/card_remaining"
+        app:trackColor="@color/gray_light"
+        app:trackThickness="8dp" />
+
+
+    <TextView
+        android:id="@+id/tv_percentage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0%"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="@id/progress_budget"
+        app:layout_constraintEnd_toEndOf="@id/progress_budget"
+        app:layout_constraintStart_toStartOf="@id/progress_budget"
+        app:layout_constraintTop_toTopOf="@id/progress_budget" />
+
+    <!-- Botón para editar presupuesto -->
+    <Button
+        android:id="@+id/btn_set_budget"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:text="Establecer Presupuesto"
+        app:backgroundTint="@color/primaryColor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progress_budget" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

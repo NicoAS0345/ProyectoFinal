@@ -38,4 +38,8 @@ class GastosRepositoryFirebase @Inject constructor(
     suspend fun deleteAllGastos() {
         gastosFirebase.deleteAllGastos()
     }
+
+    suspend fun getGastoById(id: String): GastosFirebase? {
+        return gastosFirebase.getGastoById(id)
+    }
 }

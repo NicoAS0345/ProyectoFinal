@@ -6,9 +6,14 @@
         android:title="Inicio"/>
 
     <item
-        android:id="@+id/nav_history"
+        android:id="@+id/historyFragment"
         android:icon="@drawable/ic_search"
         android:title="Historial"/>
+
+    <item
+        android:id="@+id/budgetFragment"
+        android:icon="@drawable/ic_wallet"
+        android:title="Presupuesto"/>
 
     <!--<item
         android:id="@+id/nav_settings"

@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nicolearaya.smartbudget.PantallaPrincipalActivity
@@ -17,14 +18,17 @@ import com.nicolearaya.smartbudget.R
 import com.nicolearaya.smartbudget.databinding.FragmentEditExpenseBinding
 import com.nicolearaya.smartbudget.model.Gastos
 import com.nicolearaya.smartbudget.model.GastosFirebase
+import com.nicolearaya.smartbudget.viewmodel.BudgetViewModel
 import com.nicolearaya.smartbudget.viewmodel.GastosViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class EditExpenseFragment : Fragment() {
     private var _binding: FragmentEditExpenseBinding? = null
     private val binding get() = _binding!!
     private val viewModel: GastosViewModel by viewModels()
+    private val budgetViewModel: BudgetViewModel by viewModels()
     private lateinit var currentGasto: GastosFirebase
 
     override fun onCreateView(
@@ -76,9 +80,29 @@ class EditExpenseFragment : Fragment() {
                     categoria = categoriaGasto.text.toString()
                 )
 
-                viewModel.update(updatedGasto) // Actualiza en la base de datos
-                Toast.makeText(requireContext(), "Gasto actualizado", Toast.LENGTH_SHORT).show()
-                findNavController().popBackStack() // Regresa al fragmento anterior
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try {
+                        // 1. Calcular diferencia de montos
+                        val montoOriginal = currentGasto.monto
+                        val diferencia = updatedGasto.monto - montoOriginal
+
+                        // 2. Actualizar gasto (existente)
+                        viewModel.update(updatedGasto)
+
+                        // 3. Verificar presupuesto (nuevo)
+                        budgetViewModel.budget.value?.let { budget ->
+                            if ((budget.currentSpending + diferencia) > budget.monthlyBudget) {
+                                showBudgetExceededDialog()
+                            }
+                        }
+
+                        Toast.makeText(requireContext(), "Gasto actualizado", Toast.LENGTH_SHORT).show()
+                        findNavController().popBackStack()
+                    } catch (e: Exception) {
+                        Toast.makeText(requireContext(), "Error al actualizar: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
 
@@ -139,6 +163,14 @@ class EditExpenseFragment : Fragment() {
             .show()
     }
 
+    //Mesaje sobre el presupuesto
+    private fun showBudgetExceededDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("¡Presupuesto excedido!")
+            .setMessage("Esta modificación ha excedido tu presupuesto mensual.")
+            .setPositiveButton("Entendido", null)
+            .show()
+    }
 
     override fun onResume() {
         super.onResume()

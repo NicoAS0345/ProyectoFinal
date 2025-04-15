@@ -1,6 +1,7 @@
 package com.nicolearaya.smartbudget
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.nicolearaya.smartbudget.databinding.ActivityPantallaPrincipalBinding
@@ -30,20 +31,12 @@ class PantallaPrincipalActivity : AppCompatActivity() {
         binding = ActivityPantallaPrincipalBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Configuración de la barra de navegación inferior
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        // Configura el NavController
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment
+        navController = navHostFragment.navController
 
-        // Define los destinos principales
-        appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.nav_home,
-                /*R.id.nav_search,
-                R.id.nav_settings*/
-            )
+        setupBottomNav()
 
-        )
-        // Configura barra de navegación inferior
-        binding.barraNavegacion.setupWithNavController(navController)
 
         // Configuración del botón flotante
         binding.anadirGasto.setOnClickListener {
@@ -54,7 +47,7 @@ class PantallaPrincipalActivity : AppCompatActivity() {
         }
 
         setupNavigation()
-        setupBottomNav()
+
     }
 
     // Método para que los fragmentos controlen la visibilidad del FAB
@@ -68,21 +61,25 @@ class PantallaPrincipalActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNav() {
-        // Deshabilitamos la navegación automática
         binding.barraNavegacion.setOnItemSelectedListener { item ->
+            Log.d("NAV_DEBUG", "Intentando navegar al ID: ${item.itemId}")
             when (item.itemId) {
                 R.id.nav_home -> {
-                    // Volver al home fragment sin crear nueva instancia
-                    navController.popBackStack(R.id.nav_home, false)
+                    navController.navigate(R.id.nav_home)
                     true
                 }
-                R.id.nav_history -> {
+                R.id.historyFragment -> {
                     navController.navigate(R.id.historyFragment)
+                    true
+                }
+                R.id.budgetFragment -> {
+                    navController.navigate(R.id.budgetFragment)
                     true
                 }
                 else -> false
             }
         }
+
 
         // Configurar el botón flotante
         binding.anadirGasto.setOnClickListener {

@@ -50,6 +50,10 @@
             app:destination="@id/loginFragment"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+
+        <action
+            android:id="@+id/action_homeFragment_to_budgetFragment"
+            app:destination="@id/budgetFragment"/>
     </fragment>
 
     <fragment
@@ -78,5 +82,15 @@
         <action
             android:id="@+id/action_historyFragment_to_editExpenseFragment"
             app:destination="@id/editExpenseFragment" />
+
+        <action
+            android:id="@+id/action_historyFragment_to_budgetFragment"
+            app:destination="@id/budgetFragment"/>
     </fragment>
+
+    <fragment
+        android:id="@+id/budgetFragment"
+        android:name="com.nicolearaya.smartbudget.ui.budget.BudgetFragment"
+        android:label="Presupuesto"
+        tools:layout="@layout/fragment_budget"/>
 </navigation>

@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nicolearaya.smartbudget.PantallaPrincipalActivity
@@ -17,8 +18,10 @@ import com.nicolearaya.smartbudget.databinding.FragmentAddExpenseBinding
 import com.nicolearaya.smartbudget.model.Gastos
 import com.nicolearaya.smartbudget.model.GastosFirebase
 import com.nicolearaya.smartbudget.ui.home.HomeFragment
+import com.nicolearaya.smartbudget.viewmodel.BudgetViewModel
 import com.nicolearaya.smartbudget.viewmodel.GastosViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class AddExpenseFragment : Fragment() {
@@ -28,6 +31,7 @@ class AddExpenseFragment : Fragment() {
 
     // ViewModel para manejar operaciones de gastos (inyectado con Hilt)
     private val viewModel: GastosViewModel by viewModels()
+    private val budgetViewModel: BudgetViewModel by viewModels()
 
     //Le inserta el layout a la vista para que se pueda ver la interfaz grafica
     override fun onCreateView(
@@ -77,8 +81,24 @@ class AddExpenseFragment : Fragment() {
                 nuevoGasto.categoria = "Sin categoría"
             }
 
-            viewModel.insert(nuevoGasto)
-            findNavController().popBackStack() // Regresa al fragment anterior
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    // 1. Insertar gasto
+                    viewModel.insert(nuevoGasto)
+
+                    // 2. Verificar presupuesto con BudgetViewModel
+                    budgetViewModel.budget.value?.let { budget ->
+                        if ((budget.currentSpending + monto) > budget.monthlyBudget) {
+                            showBudgetExceededDialog()
+                        }
+                    }
+
+                    findNavController().popBackStack()
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
         } else {
             Toast.makeText(requireContext(), "Completa todos los campos", Toast.LENGTH_SHORT).show()
         }
@@ -147,6 +167,17 @@ class AddExpenseFragment : Fragment() {
             showCategoryDialog()
         }
     }
+
+    //Mesaje sobre el presupuesto
+    // Añade esta función
+    private fun showBudgetExceededDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("¡Presupuesto excedido!")
+            .setMessage("Has superado tu presupuesto mensual. Revisa tus gastos.")
+            .setPositiveButton("Entendido", null)
+            .show()
+    }
+
 
     // Controla la visibilidad del FAB en la actividad principal
 

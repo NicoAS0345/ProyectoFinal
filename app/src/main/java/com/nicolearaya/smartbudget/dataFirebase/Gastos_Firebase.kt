@@ -8,6 +8,7 @@ import com.nicolearaya.smartbudget.model.GastosFirebase
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 // Clase que maneja todas las operaciones con Firebase Firestore para los gastos
@@ -162,5 +163,20 @@ class Gastos_Firebase @Inject constructor(
             .addOnFailureListener { e ->
                 Log.e("DeleteAll", "Error al obtener gastos: ${e.message}")
             }
+    }
+
+    suspend fun getGastoById(id: String): GastosFirebase? {
+        return try {
+            firestore.collection(coleccion1)
+                .document(usuario)
+                .collection(coleccion2)
+                .document(id)
+                .get()
+                .await()
+                .toObject(GastosFirebase::class.java)
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error al obtener gasto por ID", e)
+            null
+        }
     }
 }
