@@ -1,5 +1,6 @@
 package com.nicolearaya.smartbudget.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -41,4 +42,34 @@ class BudgetViewModel @Inject constructor(
             repository.updateBudget(newBudget)
         }
     }
+
+    fun resetBudget() {
+        viewModelScope.launch {
+            try {
+                // Usa solo resetCurrentSpending que ahora actualiza ambos campos
+                repository.resetCurrentSpending()
+            } catch (e: Exception) {
+                Log.e("BudgetViewModel", "Error al reiniciar presupuesto", e)
+            }
+        }
+    }
+
+    suspend fun checkAndShowExceeded(amount: Double): Boolean {
+        return try {
+            // Forzar una actualización sincrónica del presupuesto
+            val currentBudget = repository.getBudgetOnce()
+            val newSpending = currentBudget.currentSpending + amount
+
+            if (newSpending > currentBudget.monthlyBudget) {
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+
+
 }

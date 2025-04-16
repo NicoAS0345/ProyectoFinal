@@ -85,4 +85,30 @@ class Budget_Firebase @Inject constructor(
             transaction.update(document, "currentSpending", newSpending)
         }.await()
     }
+
+    suspend fun resetCurrentSpending() {
+        try {
+            val budgetRef = firestore.collection(collectionName).document(userId)
+            firestore.runTransaction { transaction ->
+                // Resetear ambos valores a 0
+                transaction.update(budgetRef,
+                    "monthlyBudget", 0.0,
+                    "currentSpending", 0.0
+                )
+            }.await()
+            Log.d("BudgetFirebase", "Presupuesto reiniciado a cero")
+        } catch (e: Exception) {
+            Log.e("BudgetFirebase", "Error al reiniciar presupuesto", e)
+            throw e
+        }
+    }
+
+    suspend fun getBudgetOnce(): Budget {
+        val snapshot = firestore.collection(collectionName)
+            .document(userId)
+            .get()
+            .await()
+
+        return snapshot.toObject(Budget::class.java) ?: Budget(userId = userId)
+    }
 }

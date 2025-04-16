@@ -175,4 +175,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/progress_budget" />
 
+    <!-- Agrega este botón justo debajo del botón existente -->
+    <Button
+        android:id="@+id/btn_reset_budget"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="32dp"
+        android:text="Reiniciar Presupuesto"
+        app:backgroundTint="@color/red"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_set_budget" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

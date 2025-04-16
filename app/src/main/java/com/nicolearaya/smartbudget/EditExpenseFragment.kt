@@ -66,39 +66,36 @@ class EditExpenseFragment : Fragment() {
             setupCategorySelector()
 
             btnSaveEditExpense.setOnClickListener {
-                // Validación básica
-                if (nombreGasto.text.isNullOrEmpty() || montoGasto.text.isNullOrEmpty()) {
-                    Toast.makeText(requireContext(), "Nombre y monto son obligatorios", Toast.LENGTH_SHORT).show()
-                    return@setOnClickListener
-                }
-
-                // Crea una copia actualizada del gasto
-                val updatedGasto = currentGasto.copy(
-                    nombreGasto = nombreGasto.text.toString(),
-                    monto = montoGasto.text.toString().toDoubleOrNull() ?: 0.0,
-                    descripcion = descripcionGasto.text.toString(),
-                    categoria = categoriaGasto.text.toString()
-                )
-
-
                 viewLifecycleOwner.lifecycleScope.launch {
                     try {
-                        // 1. Calcular diferencia de montos
-                        val montoOriginal = currentGasto.monto
-                        val diferencia = updatedGasto.monto - montoOriginal
 
-                        // 2. Actualizar gasto (existente)
-                        viewModel.update(updatedGasto)
+                        val diferencia = binding.montoGasto.text.toString().toDouble() - currentGasto.monto
+                        val willExceed = budgetViewModel.checkAndShowExceeded(diferencia)
 
-                        // 3. Verificar presupuesto (nuevo)
-                        budgetViewModel.budget.value?.let { budget ->
-                            if ((budget.currentSpending + diferencia) > budget.monthlyBudget) {
-                                showBudgetExceededDialog()
-                            }
+                        // Validación básica
+                        if (nombreGasto.text.isNullOrEmpty() || montoGasto.text.isNullOrEmpty()) {
+                            Toast.makeText(requireContext(), "Nombre y monto son obligatorios", Toast.LENGTH_SHORT).show()
                         }
 
+                        // Crea una copia actualizada del gasto
+                        val updatedGasto = currentGasto.copy(
+                            nombreGasto = nombreGasto.text.toString(),
+                            monto = montoGasto.text.toString().toDoubleOrNull() ?: 0.0,
+                            descripcion = descripcionGasto.text.toString(),
+                            categoria = categoriaGasto.text.toString()
+                        )
+
+                        // 1. Actualizar el gasto primero
+                        viewModel.update(updatedGasto)
+
+                        if (willExceed) {
+                            showBudgetExceededDialog()
+                        }
+
+                        // Si no excede el presupuesto
                         Toast.makeText(requireContext(), "Gasto actualizado", Toast.LENGTH_SHORT).show()
                         findNavController().popBackStack()
+
                     } catch (e: Exception) {
                         Toast.makeText(requireContext(), "Error al actualizar: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
@@ -164,12 +161,23 @@ class EditExpenseFragment : Fragment() {
     }
 
     //Mesaje sobre el presupuesto
-    private fun showBudgetExceededDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("¡Presupuesto excedido!")
-            .setMessage("Esta modificación ha excedido tu presupuesto mensual.")
-            .setPositiveButton("Entendido", null)
-            .show()
+    private fun showBudgetExceededDialog(onDismiss: () -> Unit = {}) {
+        budgetViewModel.budget.value?.let { budget ->
+            val exceso = budget.currentSpending - budget.monthlyBudget
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("¡Presupuesto excedido!")
+                .setMessage(
+                    "Has superado tu presupuesto mensual por $${String.format("%.2f", exceso)}. " +
+                            "Presupuesto: $${String.format("%.2f", budget.monthlyBudget)}\n" +
+                            "Gastado: $${String.format("%.2f", budget.currentSpending)}"
+                )
+                .setPositiveButton("Entendido") { dialog, _ ->
+                    dialog.dismiss()
+                    onDismiss() // Ejecuta la callback al cerrar
+                }
+                .setCancelable(false) // Obliga al usuario a presionar el botón
+                .show()
+        }
     }
 
     override fun onResume() {

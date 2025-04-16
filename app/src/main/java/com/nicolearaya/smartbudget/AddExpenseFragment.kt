@@ -68,32 +68,36 @@ class AddExpenseFragment : Fragment() {
 
         //Llena el modelo
         if (nombre.isNotEmpty() && monto > 0) {
-            //Lo trae de Firebase ya no de la base de datos local
-            val nuevoGasto = GastosFirebase(
-                nombreGasto = nombre,
-                descripcion = descripcion,
-                categoria = categoria,
-                monto = monto
-            )
-
-            //Si la categoria viene vacia entonces que la agregue sin categoria
-            if (nuevoGasto.categoria.isNullOrEmpty()) {
-                nuevoGasto.categoria = "Sin categoría"
-            }
 
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
-                    // 1. Insertar gasto
+                    // 1. Verificar ANTES de insertar
+                    val willExceed = budgetViewModel.checkAndShowExceeded(monto)
+
+                    //Lo trae de Firebase ya no de la base de datos local
+                    val nuevoGasto = GastosFirebase(
+                        nombreGasto = nombre,
+                        descripcion = descripcion,
+                        categoria = categoria,
+                        monto = monto
+                    )
+
+                    //Si la categoria viene vacia entonces que la agregue sin categoria
+                    if (nuevoGasto.categoria.isNullOrEmpty()) {
+                        nuevoGasto.categoria = "Sin categoría"
+                    }
+
+                    // 1. Insertar el gasto primero
                     viewModel.insert(nuevoGasto)
 
-                    // 2. Verificar presupuesto con BudgetViewModel
-                    budgetViewModel.budget.value?.let { budget ->
-                        if ((budget.currentSpending + monto) > budget.monthlyBudget) {
-                            showBudgetExceededDialog()
-                        }
+
+                    // 3. Mostrar diálogo si es necesario
+                    if (willExceed) {
+                        showBudgetExceededDialog()
                     }
 
                     findNavController().popBackStack()
+
                 } catch (e: Exception) {
                     Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
@@ -169,13 +173,23 @@ class AddExpenseFragment : Fragment() {
     }
 
     //Mesaje sobre el presupuesto
-    // Añade esta función
-    private fun showBudgetExceededDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("¡Presupuesto excedido!")
-            .setMessage("Has superado tu presupuesto mensual. Revisa tus gastos.")
-            .setPositiveButton("Entendido", null)
-            .show()
+    private fun showBudgetExceededDialog(onDismiss: () -> Unit = {}) {
+        budgetViewModel.budget.value?.let { budget ->
+            val exceso = budget.currentSpending - budget.monthlyBudget
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("¡Presupuesto excedido!")
+                .setMessage(
+                    "Has superado tu presupuesto mensual por $${String.format("%.2f", exceso)}. " +
+                            "Presupuesto: $${String.format("%.2f", budget.monthlyBudget)}\n" +
+                            "Gastado: $${String.format("%.2f", budget.currentSpending)}"
+                )
+                .setPositiveButton("Entendido") { dialog, _ ->
+                    dialog.dismiss()
+                    onDismiss() // Ejecuta la callback al cerrar
+                }
+                .setCancelable(false) // Obliga al usuario a presionar el botón
+                .show()
+        }
     }
 
 

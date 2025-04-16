@@ -19,4 +19,13 @@ class BudgetRepositoryFirebase @Inject constructor(
     suspend fun updateCurrentSpending(amount: Double, isAdding: Boolean) {
         budgetFirebase.updateCurrentSpending(amount, isAdding)
     }
+
+    suspend fun resetCurrentSpending()
+    {
+        budgetFirebase.resetCurrentSpending()
+    }
+
+    suspend fun getBudgetOnce(): Budget {
+        return budgetFirebase.getBudgetOnce()
+    }
 }

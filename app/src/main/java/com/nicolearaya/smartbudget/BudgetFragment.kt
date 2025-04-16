@@ -2,6 +2,7 @@ package com.nicolearaya.smartbudget.ui.budget
 
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -52,6 +53,10 @@ class BudgetFragment : Fragment() {
         binding.btnSetBudget.setOnClickListener {
             showSetBudgetDialog()
         }
+
+        binding.btnResetBudget.setOnClickListener {
+            showResetConfirmationDialog()
+        }
     }
 
     private fun updateUI(budget: Budget) {
@@ -63,10 +68,22 @@ class BudgetFragment : Fragment() {
         val remaining = budget.monthlyBudget - budget.currentSpending
         binding.tvRemainingBudget.text = currencyFormat.format(remaining)
 
-        if (remaining < 0) {
-            binding.tvRemainingBudget.setTextColor(resources.getColor(android.R.color.holo_red_dark))
+        // Establece colores (opcional)
+        binding.tvRemainingBudget.setTextColor(
+            if (remaining < 0) resources.getColor(android.R.color.holo_red_dark)
+            else resources.getColor(android.R.color.holo_green_dark)
+        )
+
+        // Actualiza el progreso (si lo usas)
+        binding.progressBudget.progress = calculateProgress(budget)
+        binding.tvPercentage.text = "${calculateProgress(budget)}%"
+    }
+
+    private fun calculateProgress(budget: Budget): Int {
+        return if (budget.monthlyBudget > 0) {
+            ((budget.currentSpending / budget.monthlyBudget) * 100).toInt()
         } else {
-            binding.tvRemainingBudget.setTextColor(resources.getColor(android.R.color.holo_green_dark))
+            0
         }
     }
 
@@ -93,6 +110,21 @@ class BudgetFragment : Fragment() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    //Para reiniciar los montos
+    private fun showResetConfirmationDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Reiniciar Presupuesto")
+            .setMessage("¿Estás seguro que deseas reiniciar tu presupuesto?")
+            .setPositiveButton("Reiniciar") { dialog, _ ->
+                Log.d("BudgetFragment", "Iniciando reinicio...")
+                viewModel.resetBudget()
+                Toast.makeText(requireContext(), "Presupuesto reiniciado", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
             }
             .setNegativeButton("Cancelar", null)
             .show()

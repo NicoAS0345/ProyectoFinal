@@ -22,13 +22,16 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import android.app.AlertDialog
 import android.content.Context
+import android.icu.text.NumberFormat
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.CheckBox
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.search.SearchView
 import com.google.firebase.Firebase
 import com.google.firebase.app
@@ -36,7 +39,14 @@ import com.google.firebase.firestore.firestore
 import com.google.firebase.options
 import com.nicolearaya.smartbudget.DateUtils
 import com.nicolearaya.smartbudget.PantallaPrincipalActivity
+import com.nicolearaya.smartbudget.model.Budget
 import com.nicolearaya.smartbudget.model.GastosFirebase
+import com.nicolearaya.smartbudget.viewmodel.BudgetViewModel
+
+
+//Constantes para no volver a mostrar el dialogo de no molestar
+private const val PREFS_NAME = "BudgetPrefs"
+private const val KEY_DONT_SHOW_ALERT = "dont_show_budget_alert"
 
 
 @AndroidEntryPoint
@@ -44,8 +54,10 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private val viewModel: GastosViewModel by viewModels()
+    private val budgetviewmodel: BudgetViewModel by viewModels()
     private var gastosOriginales: List<GastosFirebase> = emptyList()
     private var categoriasSeleccionadas: MutableSet<String> = mutableSetOf()
+
 
     private val adapter = GastosAdapter(
         // Navega al EditExpenseFragment con el gasto seleccionado
@@ -120,6 +132,17 @@ class HomeFragment : Fragment() {
 
                     // Actualiza tu RecyclerView aquí
                     adapter.submitList(gastos)
+                }
+            }
+        }
+
+        //Esta checkeando el presupuesto
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                budgetviewmodel.budget.collect { budget ->
+                    budget?.let {
+                        checkBudgetExceeded(it)
+                    }
                 }
             }
         }
@@ -238,6 +261,49 @@ class HomeFragment : Fragment() {
             "Filtrado por: ${categoriasSeleccionadas.joinToString(", ")}"
         }
         Toast.makeText(requireContext(), filterStatus, Toast.LENGTH_SHORT).show()
+    }
+
+    //Para verificar cambios en el presupuesto
+    private fun checkBudgetExceeded(budget: Budget) {
+        val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val alertDisabled = prefs.getBoolean(KEY_DONT_SHOW_ALERT, false)
+
+        if (!alertDisabled && budget.monthlyBudget > 0 && budget.currentSpending > budget.monthlyBudget) {
+            val exceso = budget.currentSpending - budget.monthlyBudget
+            showBudgetAlert(
+                "¡Presupuesto excedido!",
+                "Has superado tu presupuesto por ${NumberFormat.getCurrencyInstance().format(exceso)}"
+            )
+        }
+
+        if (budget.currentSpending <= budget.monthlyBudget) {
+            prefs.edit().putBoolean(KEY_DONT_SHOW_ALERT, false).apply()
+        }
+
+    }
+
+    private fun showBudgetAlert(title: String, message: String) {
+        if (!isAdded || isHidden) return
+
+        val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        if (prefs.getBoolean(KEY_DONT_SHOW_ALERT, false)) return
+
+        val dialogView = layoutInflater.inflate(R.layout.dialog_budget_alert, null)
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(title)
+            .setMessage(message)
+            .setView(dialogView)
+            .setBackgroundInsetTop(0)  // Elimina el padding superior del diálogo
+            .setBackgroundInsetBottom(0) // Elimina el padding inferior
+            .setPositiveButton("Entendido") { dialog, _ ->
+                if (dialogView.findViewById<CheckBox>(R.id.cb_dont_show_again).isChecked) {
+                    prefs.edit().putBoolean(KEY_DONT_SHOW_ALERT, true).apply()
+                }
+                dialog.dismiss()
+            }
+            .setCancelable(false)
+            .show()
     }
 
 
