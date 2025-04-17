@@ -85,25 +85,33 @@ class GastosViewModel @Inject constructor(
     fun insert(gasto: GastosFirebase) = viewModelScope.launch {
         gasto.userId = auth.currentUser?.uid ?: ""
         firebaseRepository.insert(gasto)
-        budgetRepository.updateCurrentSpending(gasto.monto, true)
+        // Solo actualizar el presupuesto si el gasto es del mes actual
+        if (DateUtils.isCurrentMonth(gasto.fechaCreacion)) {
+            budgetRepository.updateCurrentSpending(gasto.monto, true)
+        }
     }
 
     fun update(gasto: GastosFirebase) = viewModelScope.launch {
         try {
-            // Obtenemos el gasto anterior
             val oldGasto = firebaseRepository.getGastoById(gasto.id)
 
-            // Actualizamos el gasto
+            // Actualiza primero el gasto en Firestore
             firebaseRepository.update(gasto)
 
-            // Actualizamos el presupuesto
-            oldGasto?.let {
-                budgetRepository.updateCurrentSpending(it.monto, false) // Restamos el monto antiguo
-                budgetRepository.updateCurrentSpending(gasto.monto, true) // Sumamos el nuevo monto
-            } ?: run {
-                // Si no encontramos el gasto anterior, solo sumamos el nuevo
-                budgetRepository.updateCurrentSpending(gasto.monto, true)
+            oldGasto?.let { old ->
+                // Solo actualizar si es del mes actual
+                if (DateUtils.isCurrentMonth(old.fechaCreacion)) {
+                    // Calcula la diferencia (nuevo - viejo)
+                    val diferencia = gasto.monto - old.monto
+
+                    if (diferencia != 0.0) { // Solo actualizar si hay cambio
+                        budgetRepository.updateCurrentSpending(diferencia, isAdding = true)
+                    }
+                }
             }
+
+            // Vuelve a cargar los gastos para actualizar la UI
+            loadGastos()
         } catch (e: Exception) {
             Log.e("GastosViewModel", "Error al actualizar gasto", e)
         }
@@ -111,7 +119,10 @@ class GastosViewModel @Inject constructor(
 
     fun delete(gasto: GastosFirebase) = viewModelScope.launch {
         firebaseRepository.delete(gasto)
-        budgetRepository.updateCurrentSpending(gasto.monto, false)
+        // Solo restar del presupuesto si el gasto es del mes actual
+        if (DateUtils.isCurrentMonth(gasto.fechaCreacion)) {
+            budgetRepository.updateCurrentSpending(gasto.monto, false)
+        }
     }
 
     fun deleteAllGastos() = viewModelScope.launch {

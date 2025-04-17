@@ -72,7 +72,8 @@ class AddExpenseFragment : Fragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
                     // 1. Verificar ANTES de insertar
-                    val willExceed = budgetViewModel.checkAndShowExceeded(monto)
+                    val willExceed = budgetViewModel.checkAndShowExceeded(amount = monto,
+                        currentMonthGastos = viewModel.gastos.value )
 
                     //Lo trae de Firebase ya no de la base de datos local
                     val nuevoGasto = GastosFirebase(

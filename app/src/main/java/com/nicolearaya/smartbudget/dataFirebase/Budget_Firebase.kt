@@ -86,6 +86,7 @@ class Budget_Firebase @Inject constructor(
         }.await()
     }
 
+
     suspend fun resetCurrentSpending() {
         try {
             val budgetRef = firestore.collection(collectionName).document(userId)

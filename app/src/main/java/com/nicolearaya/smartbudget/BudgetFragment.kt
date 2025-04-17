@@ -46,6 +46,7 @@ class BudgetFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.budget.collect { budget ->
                     budget?.let { updateUI(it) }
+                    Log.d("BudgetFragment", "Budget actualizado: ") // Para debug
                 }
             }
         }

@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.nicolearaya.smartbudget.dataFirebase.BudgetRepositoryFirebase
+import com.nicolearaya.smartbudget.dataFirebase.GastosRepositoryFirebase
 import com.nicolearaya.smartbudget.model.Budget
+import com.nicolearaya.smartbudget.model.GastosFirebase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,11 +18,12 @@ import javax.inject.Inject
 @HiltViewModel
 class BudgetViewModel @Inject constructor(
     private val repository: BudgetRepositoryFirebase,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
 ) : ViewModel() {
 
     private val _budget = MutableStateFlow<Budget?>(null)
     val budget: StateFlow<Budget?> = _budget.asStateFlow()
+
 
     private val userId: String
         get() = auth.currentUser?.uid ?: ""
@@ -28,6 +31,7 @@ class BudgetViewModel @Inject constructor(
     init {
         loadBudget()
     }
+
 
     private fun loadBudget() {
         viewModelScope.launch {
@@ -46,7 +50,6 @@ class BudgetViewModel @Inject constructor(
     fun resetBudget() {
         viewModelScope.launch {
             try {
-                // Usa solo resetCurrentSpending que ahora actualiza ambos campos
                 repository.resetCurrentSpending()
             } catch (e: Exception) {
                 Log.e("BudgetViewModel", "Error al reiniciar presupuesto", e)
@@ -54,17 +57,11 @@ class BudgetViewModel @Inject constructor(
         }
     }
 
-    suspend fun checkAndShowExceeded(amount: Double): Boolean {
+    suspend fun checkAndShowExceeded(amount: Double, currentMonthGastos: List<GastosFirebase>): Boolean {
         return try {
-            // Forzar una actualización sincrónica del presupuesto
             val currentBudget = repository.getBudgetOnce()
-            val newSpending = currentBudget.currentSpending + amount
-
-            if (newSpending > currentBudget.monthlyBudget) {
-                true
-            } else {
-                false
-            }
+            val totalSpending = currentMonthGastos.sumOf { it.monto }
+            (totalSpending + amount) > currentBudget.monthlyBudget
         } catch (e: Exception) {
             false
         }

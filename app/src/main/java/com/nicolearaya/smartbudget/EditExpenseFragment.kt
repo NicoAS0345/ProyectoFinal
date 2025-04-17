@@ -69,13 +69,15 @@ class EditExpenseFragment : Fragment() {
                 viewLifecycleOwner.lifecycleScope.launch {
                     try {
 
-                        val diferencia = binding.montoGasto.text.toString().toDouble() - currentGasto.monto
-                        val willExceed = budgetViewModel.checkAndShowExceeded(diferencia)
-
                         // Validación básica
                         if (nombreGasto.text.isNullOrEmpty() || montoGasto.text.isNullOrEmpty()) {
                             Toast.makeText(requireContext(), "Nombre y monto son obligatorios", Toast.LENGTH_SHORT).show()
+                            return@launch
                         }
+
+                        val nuevoMonto = binding.montoGasto.text.toString().toDouble() - currentGasto.monto
+                        val diferencia = nuevoMonto - currentGasto.monto // Esto puede ser positivo o negativo
+
 
                         // Crea una copia actualizada del gasto
                         val updatedGasto = currentGasto.copy(
@@ -85,12 +87,20 @@ class EditExpenseFragment : Fragment() {
                             categoria = categoriaGasto.text.toString()
                         )
 
+                        // Verificar exceso de presupuesto si hay aumento
+                        if (diferencia > 0) {
+                            val willExceed = budgetViewModel.checkAndShowExceeded(
+                                amount = diferencia,
+                                currentMonthGastos = viewModel.gastos.value
+                            )
+                            if (willExceed) {
+                                showBudgetExceededDialog()
+                            }
+                        }
+
                         // 1. Actualizar el gasto primero
                         viewModel.update(updatedGasto)
 
-                        if (willExceed) {
-                            showBudgetExceededDialog()
-                        }
 
                         // Si no excede el presupuesto
                         Toast.makeText(requireContext(), "Gasto actualizado", Toast.LENGTH_SHORT).show()
