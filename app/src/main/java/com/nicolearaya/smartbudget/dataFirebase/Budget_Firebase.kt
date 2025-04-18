@@ -77,11 +77,14 @@ class Budget_Firebase @Inject constructor(
     }
 
     suspend fun updateCurrentSpending(amount: Double, isAdding: Boolean) {
+        Log.d("Updategastos5", "monto: ${amount}" )
         firestore.runTransaction { transaction ->
             val document = firestore.collection(collectionName).document(userId)
             val snapshot = transaction.get(document)
             val currentSpending = snapshot.getDouble("currentSpending") ?: 0.0
+            Log.d("Updategastos4", "gasto actual: ${currentSpending}" )
             val newSpending = if (isAdding) currentSpending + amount else currentSpending - amount
+            Log.d("Updategastos6", "gasto actual despues de que lo tuvo que actualizar: ${newSpending}" )
             transaction.update(document, "currentSpending", newSpending)
         }.await()
     }

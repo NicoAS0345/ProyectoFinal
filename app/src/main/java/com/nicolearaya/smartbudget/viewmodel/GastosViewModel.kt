@@ -21,6 +21,7 @@ import com.nicolearaya.smartbudget.DateUtils
 import com.nicolearaya.smartbudget.dataFirebase.BudgetRepositoryFirebase
 import com.nicolearaya.smartbudget.dataFirebase.GastosRepositoryFirebase
 import com.nicolearaya.smartbudget.model.GastosFirebase
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collect
@@ -91,9 +92,13 @@ class GastosViewModel @Inject constructor(
         }
     }
 
-    fun update(gasto: GastosFirebase) = viewModelScope.launch {
+    fun update(gasto: GastosFirebase): Job = viewModelScope.launch {
         try {
+            Log.d("UpdateDebug", "Antes de llamar a getGastoById()")
             val oldGasto = firebaseRepository.getGastoById(gasto.id)
+            Log.d("UpdateDebug", "Después de llamar a getGastoById()")
+            Log.d("Updategastos2", "Gasto viejo: ${oldGasto}" )
+
 
             // Actualiza primero el gasto en Firestore
             firebaseRepository.update(gasto)
@@ -104,8 +109,11 @@ class GastosViewModel @Inject constructor(
                     // Calcula la diferencia (nuevo - viejo)
                     val diferencia = gasto.monto - old.monto
 
+                    Log.d("Updategastos2.1", "Gasto viejo monto: ${old.monto}" )
+
                     if (diferencia != 0.0) { // Solo actualizar si hay cambio
-                        budgetRepository.updateCurrentSpending(diferencia, isAdding = true)
+                        Log.d("Updategastos3", "diferencia: ${diferencia}" )
+                         budgetRepository.updateCurrentSpending(diferencia, isAdding = true)
                     }
                 }
             }

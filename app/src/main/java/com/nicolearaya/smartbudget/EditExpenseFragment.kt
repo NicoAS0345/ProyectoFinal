@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.nicolearaya.smartbudget.PantallaPrincipalActivity
 import com.nicolearaya.smartbudget.R
+import com.nicolearaya.smartbudget.dataFirebase.Gastos_Firebase
 import com.nicolearaya.smartbudget.databinding.FragmentEditExpenseBinding
 import com.nicolearaya.smartbudget.model.Gastos
 import com.nicolearaya.smartbudget.model.GastosFirebase
@@ -30,6 +31,7 @@ class EditExpenseFragment : Fragment() {
     private val viewModel: GastosViewModel by viewModels()
     private val budgetViewModel: BudgetViewModel by viewModels()
     private lateinit var currentGasto: GastosFirebase
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -75,14 +77,15 @@ class EditExpenseFragment : Fragment() {
                             return@launch
                         }
 
-                        val nuevoMonto = binding.montoGasto.text.toString().toDouble() - currentGasto.monto
-                        val diferencia = nuevoMonto - currentGasto.monto // Esto puede ser positivo o negativo
+                        val nuevoMonto = binding.montoGasto.text.toString().toDouble()
+                        val diferencia = nuevoMonto - currentGasto.monto
 
 
                         // Crea una copia actualizada del gasto
                         val updatedGasto = currentGasto.copy(
                             nombreGasto = nombreGasto.text.toString(),
-                            monto = montoGasto.text.toString().toDoubleOrNull() ?: 0.0,
+                            //monto = montoGasto.text.toString().toDoubleOrNull() ?: 0.0,
+                            monto = nuevoMonto,
                             descripcion = descripcionGasto.text.toString(),
                             categoria = categoriaGasto.text.toString()
                         )
@@ -99,7 +102,8 @@ class EditExpenseFragment : Fragment() {
                         }
 
                         // 1. Actualizar el gasto primero
-                        viewModel.update(updatedGasto)
+                        viewModel.update(updatedGasto).join()//esto es para que el sistema tenga tiempo de terminar la operación
+                        Log.d("Updategastos1", "Gasto actualizado ${updatedGasto}" )
 
 
                         // Si no excede el presupuesto

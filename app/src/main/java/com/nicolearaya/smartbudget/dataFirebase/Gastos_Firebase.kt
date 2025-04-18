@@ -167,16 +167,37 @@ class Gastos_Firebase @Inject constructor(
 
     suspend fun getGastoById(id: String): GastosFirebase? {
         return try {
-            firestore.collection(coleccion1)
+            Log.d("GetGastoDebug", "Inicio de getGastoById con ID: $id")
+            Log.d("GetGastoDebug", "Usuario actual (email): ${auth.currentUser?.email}")
+            Log.d("GetGastoDebug", "Ruta completa: $coleccion1/${auth.currentUser?.email}/$coleccion2/$id")
+
+            val document = firestore.collection(coleccion1)
                 .document(usuario)
                 .collection(coleccion2)
                 .document(id)
                 .get()
                 .await()
-                .toObject(GastosFirebase::class.java)
+
+            Log.d("GetGastoDebug", "Documento obtenido. Existe? ${document.exists()}")
+
+            if (!document.exists()) {
+                Log.w("GetGastoDebug", "Documento no existe en Firestore")
+                return null
+            }
+
+            val gasto = document.toObject(GastosFirebase::class.java)
+            Log.d("GetGastoDebug", "Objeto convertido: $gasto")
+
+            if (gasto?.userId != auth.currentUser?.uid) {
+                Log.w("GetGastoDebug", "El gasto no pertenece al usuario actual")
+                return null
+            }
+
+            gasto
         } catch (e: Exception) {
-            Log.e("Firestore", "Error al obtener gasto por ID", e)
+            Log.e("GetGastoDebug", "Error en getGastoById", e)
             null
         }
     }
+
 }
