@@ -28,4 +28,13 @@ class BudgetRepositoryFirebase @Inject constructor(
     suspend fun getBudgetOnce(): Budget {
         return budgetFirebase.getBudgetOnce()
     }
+
+    // BudgetRepositoryFirebase.kt
+    suspend fun saveHistoricalBudget(budget: Budget) {
+        budgetFirebase.saveHistoricalBudget(budget)
+    }
+
+    fun getHistoricalBudgets(userId: String): Flow<List<Budget>> {
+        return budgetFirebase.getHistoricalBudgets(userId)
+    }
 }

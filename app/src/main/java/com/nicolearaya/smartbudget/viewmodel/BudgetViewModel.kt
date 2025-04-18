@@ -4,11 +4,14 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.Query
+import com.nicolearaya.smartbudget.DateUtils
 import com.nicolearaya.smartbudget.dataFirebase.BudgetRepositoryFirebase
 import com.nicolearaya.smartbudget.dataFirebase.GastosRepositoryFirebase
 import com.nicolearaya.smartbudget.model.Budget
 import com.nicolearaya.smartbudget.model.GastosFirebase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +27,9 @@ class BudgetViewModel @Inject constructor(
     private val _budget = MutableStateFlow<Budget?>(null)
     val budget: StateFlow<Budget?> = _budget.asStateFlow()
 
+    private val _budgetHistory = MutableStateFlow<List<Budget>>(emptyList())
+    val budgetHistory: StateFlow<List<Budget>> = _budgetHistory
+
 
     private val userId: String
         get() = auth.currentUser?.uid ?: ""
@@ -37,6 +43,11 @@ class BudgetViewModel @Inject constructor(
         viewModelScope.launch {
             repository.getBudgetFlow().collect { budget ->
                 _budget.value = budget
+
+                // Actualizar histórico si es un mes diferente
+                if (budget.monthYear != DateUtils.getCurrentMonthYear()) {
+                    saveHistoricalBudget(budget)
+                }
             }
         }
     }
@@ -67,6 +78,12 @@ class BudgetViewModel @Inject constructor(
         }
     }
 
+    private suspend fun saveHistoricalBudget(budget: Budget) {
+        // Delegate this operation to the repository
+        repository.saveHistoricalBudget(budget)
+    }
 
-
+    fun getHistoricalBudgets(): Flow<List<Budget>> {
+        return repository.getHistoricalBudgets(userId)
+    }
 }

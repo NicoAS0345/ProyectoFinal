@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -22,14 +23,20 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import androidx.core.os.bundleOf
+import com.nicolearaya.smartbudget.DateUtils
 import com.nicolearaya.smartbudget.model.GastosFirebase
 import com.nicolearaya.smartbudget.R
+import com.nicolearaya.smartbudget.model.Budget
+import com.nicolearaya.smartbudget.viewmodel.BudgetViewModel
+import java.text.NumberFormat
 
 @AndroidEntryPoint
 class HistoryFragment : Fragment() {
     private var _binding: FragmentHistoryBinding? = null
     private val binding get() = _binding!!
     private val viewModel: GastosViewModel by viewModels()
+    private val budgetViewModel: BudgetViewModel by viewModels()
+
 
     private val adapter = GastosAdapter(
         onEditClick = { gasto ->
@@ -66,6 +73,20 @@ class HistoryFragment : Fragment() {
         binding.recyclerHistory.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerHistory.adapter = adapter
 
+        // Observar el presupuesto actual
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                budgetViewModel.budget.collect { budget ->
+                    budget?.let {
+                        if (DateUtils.isSameMonthYear(it.monthYear, DateUtils.getCurrentMonthYear())) {
+                            updateBudgetUI(it)
+                        }
+                    }
+                }
+            }
+        }
+
+        //Observar los gastos por mes
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.getGastosGroupedByMonth().collect { groupedGastos ->
@@ -73,6 +94,27 @@ class HistoryFragment : Fragment() {
                 }
             }
         }
+    }
+
+    //Función para actualizar cada vez que se produce un cambio en el presupuesto
+    private fun updateBudgetUI(budget: Budget) {
+        val currencyFormat = NumberFormat.getCurrencyInstance(Locale.getDefault())
+
+        binding.budgetCard.visibility = View.VISIBLE
+        binding.tvBudgetMonth.text = "Presupuesto ${DateUtils.formatMonthYear(budget.monthYear)}"
+        binding.tvBudgetAmount.text = currencyFormat.format(budget.monthlyBudget)
+        binding.tvBudgetSpent.text = currencyFormat.format(budget.currentSpending)
+
+        val remaining = budget.monthlyBudget - budget.currentSpending
+        binding.tvBudgetRemaining.text = currencyFormat.format(remaining)
+
+        // Cambiar color según el estado
+        val color = if (remaining < 0) {
+            ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark)
+        } else {
+            ContextCompat.getColor(requireContext(), android.R.color.holo_green_dark)
+        }
+        binding.tvBudgetRemaining.setTextColor(color)
     }
 
     private fun groupGastosByMonthYear(gastos: List<GastosFirebase>): List<Any> {

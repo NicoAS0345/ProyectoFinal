@@ -3,6 +3,8 @@ package com.nicolearaya.smartbudget.dataFirebase
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.nicolearaya.smartbudget.DateUtils
 import com.nicolearaya.smartbudget.model.Budget
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -72,7 +74,10 @@ class Budget_Firebase @Inject constructor(
     suspend fun updateBudget(newBudget: Double) {
         firestore.collection(collectionName)
             .document(userId)
-            .update("monthlyBudget", newBudget)
+            .update(
+                "monthlyBudget", newBudget,
+                "monthYear", DateUtils.getCurrentMonthYear() // Actualizar mes/año
+            )
             .await()
     }
 
@@ -94,15 +99,13 @@ class Budget_Firebase @Inject constructor(
         try {
             val budgetRef = firestore.collection(collectionName).document(userId)
             firestore.runTransaction { transaction ->
-                // Resetear ambos valores a 0
                 transaction.update(budgetRef,
                     "monthlyBudget", 0.0,
-                    "currentSpending", 0.0
+                    "currentSpending", 0.0,
+                    "monthYear", DateUtils.getCurrentMonthYear() // Resetear mes/año
                 )
             }.await()
-            Log.d("BudgetFirebase", "Presupuesto reiniciado a cero")
         } catch (e: Exception) {
-            Log.e("BudgetFirebase", "Error al reiniciar presupuesto", e)
             throw e
         }
     }
@@ -114,5 +117,28 @@ class Budget_Firebase @Inject constructor(
             .await()
 
         return snapshot.toObject(Budget::class.java) ?: Budget(userId = userId)
+    }
+
+    // Budget_Firebase.kt
+    suspend fun saveHistoricalBudget(budget: Budget) {
+        firestore.collection("BudgetHistory")
+            .document("${budget.userId}_${budget.monthYear}")
+            .set(budget)
+            .await()
+    }
+
+    fun getHistoricalBudgets(userId: String): Flow<List<Budget>> = callbackFlow {
+        val listener = firestore.collection("BudgetHistory")
+            .whereEqualTo("userId", userId)
+            .orderBy("monthYear", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                val budgets = snapshot?.toObjects(Budget::class.java) ?: emptyList()
+                trySend(budgets)
+            }
+        awaitClose { listener.remove() }
     }
 }
